@@ -1,27 +1,43 @@
-tigu_platform_frontend /
-├── README.md
-├── package.json               # workspaces: ["backend", "frontend", "shared"]
-├── tsconfig.json              # 前端 TS 配置
-├── pyproject.toml             # 后端 Poetry 配置（可放在根，也可移到 backend/）
-├── poetry.lock
-├── backend/
-│   ├── README.md
-│   ├── .env.example
-│   ├── Dockerfile
-│   ├── alembic.ini
-│   ├── migrations/
-│   ├── scripts/
-│   ├── app/
-│   │   └── … （同上方案 A 中 app/ 结构）
-│   ├── tests/
-│   └── requirements.txt
-├── frontend/                   # Vue.js + PWA 结构（同上节）
-│   ├── public/
-│   ├── src/
-│   ├── vite.config.ts
-│   └── package.json
-└── shared/                     # 跨前后端共用：类型定义、工具函数
-    ├── package.json
-    └── src/
-        ├── types/             # 如 Product、Order 接口定义
-        └── utils/             # 通用 JS/TS 函数
+tigu_frontend_vue/
+├── README.md                # Project documentation
+├── index.html              # HTML entry point
+├── package.json            # NPM dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── tsconfig.node.json      # TypeScript config for Node.js
+├── vite.config.ts          # Vite build configuration
+├── .env.example            # Environment variables template
+├── .gitignore              # Git ignore patterns
+├── public/                 # Static assets
+│   ├── favicon.ico         # Site favicon
+│   └── robots.txt          # Search engine instructions
+└── src/                    # Source code
+    ├── main.ts             # Application entry point
+    ├── App.vue             # Root Vue component
+    ├── assets/             # Project assets
+    │   └── styles/         # CSS/SCSS styles
+    │       └── main.scss   # Main stylesheet
+    ├── components/         # Reusable Vue components
+    │   └── common/         # Common UI components
+    │       └── Button.vue  # Button component
+    ├── composables/        # Vue composition API hooks
+    │   └── useApi.ts       # API interaction hook
+    ├── router/             # Vue Router configuration
+    │   └── index.ts        # Routes definition
+    ├── services/           # External service integrations
+    │   └── api.ts          # API client
+    ├── store/              # Pinia state management
+    │   ├── index.ts        # Store exports
+    │   └── modules/        # Store modules
+    │       └── counter.ts  # Counter store example
+    ├── types/              # TypeScript type definitions
+    │   └── index.ts        # Common types
+    ├── utils/              # Utility functions
+    │   └── index.ts        # Helpers and utilities
+    └── views/              # Page components
+        ├── HomeView.vue    # Home page
+        └── AboutView.vue   # About page
+├── tests/                  # Test files
+    ├── unit/               # Unit tests
+    │   └── Button.spec.ts  # Button component test
+    └── e2e/                # End-to-end tests
+        └── home.cy.ts      # Home page test

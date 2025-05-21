@@ -1,12 +1,12 @@
 <template>
   <div class="product-card">
-    <div v-if="discount" class="discount-badge">{{ discount }}% OFF</div>
+    <div v-if="discount" class="discount-badge">{{ discount }}% {{ t('products.off') || 'OFF' }}</div>
     <div v-if="isFavorite" class="favorite-icon">❤️</div>
-    <div v-if="isNew" class="new-badge">NEW</div>
+    <div v-if="isNew" class="new-badge">{{ t('products.new') || 'NEW' }}</div>
     
     <div class="product-image" :style="productImageStyle">
       <div class="quick-view">
-        <button @click="$emit('quick-view')">Quick View</button>
+        <button @click="$emit('quick-view')">{{ t('products.quickView') || 'Quick View' }}</button>
       </div>
     </div>
     
@@ -30,7 +30,7 @@
       </div>
       
       <div class="product-actions">
-        <button class="btn-add-cart" @click="$emit('add-to-cart')">Add to Cart</button>
+        <button class="btn-add-cart" @click="$emit('add-to-cart')">{{ t('products.addToCart') }}</button>
         <button class="btn-favorite" @click="$emit('toggle-favorite')">
           <span v-if="isFavorite">❤️</span>
           <span v-else>🤍</span>
@@ -42,6 +42,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   imageUrl?: string;
@@ -83,11 +86,12 @@ const productImageStyle = computed(() => {
 const availabilityClass = computed(() => {
   if (!props.availability) return '';
   
-  if (props.availability.toLowerCase().includes('in stock')) {
+  const avail = props.availability.toLowerCase();
+  if (avail.includes(t('products.inStock').toLowerCase())) {
     return 'in-stock';
-  } else if (props.availability.toLowerCase().includes('out of stock')) {
+  } else if (avail.includes(t('products.outOfStock').toLowerCase())) {
     return 'out-of-stock';
-  } else if (props.availability.toLowerCase().includes('limited')) {
+  } else if (avail.includes(t('products.limitedStock').toLowerCase())) {
     return 'limited';
   }
   

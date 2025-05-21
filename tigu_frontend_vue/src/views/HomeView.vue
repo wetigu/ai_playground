@@ -2,47 +2,47 @@
   <div class="home">
     <!-- Hero Banner -->
     <HeroBanner 
-      title="Summer Savings"
-      subtitle="Up to 30% off select products"
-      description="Shop now for the best deals on construction materials"
-      buttonText="Shop Now"
+      :title="t('home.hero.title')"
+      :subtitle="t('home.hero.subtitle')"
+      :description="t('home.heroBannerDesc') || 'Shop now for the best deals on construction materials'"
+      :buttonText="t('home.hero.shopNow')"
       buttonLink="./shop"
     />
 
     <!-- Categories Section -->
     <section class="categories-section">
       <div class="container">
-        <h2 class="section-title">Shop By Category</h2>
+        <h2 class="section-title">{{ t('home.categories.title') }}</h2>
         <div class="category-grid">
           <div class="category-card">
             <div class="category-img">🧱</div>
-            <h3>Building Materials</h3>
-            <router-link to="./category/building-materials">Shop Now</router-link>
+            <h3>{{ t('home.categories.building') }}</h3>
+            <router-link to="./category/building-materials">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔨</div>
-            <h3>Tools</h3>
-            <router-link to="./category/tools">Shop Now</router-link>
+            <h3>{{ t('home.categories.tools') }}</h3>
+            <router-link to="./category/tools">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🚪</div>
-            <h3>Doors & Windows</h3>
-            <router-link to="./category/doors-windows">Shop Now</router-link>
+            <h3>{{ t('home.categories.doors') }}</h3>
+            <router-link to="./category/doors-windows">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🪑</div>
-            <h3>Furniture</h3>
-            <router-link to="./category/furniture">Shop Now</router-link>
+            <h3>{{ t('home.categories.furniture') }}</h3>
+            <router-link to="./category/furniture">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">💡</div>
-            <h3>Lighting</h3>
-            <router-link to="./category/lighting">Shop Now</router-link>
+            <h3>{{ t('home.categories.lighting') }}</h3>
+            <router-link to="./category/lighting">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔌</div>
-            <h3>Electrical</h3>
-            <router-link to="./category/electrical">Shop Now</router-link>
+            <h3>{{ t('home.categories.electrical') }}</h3>
+            <router-link to="./category/electrical">{{ t('home.hero.shopNow') }}</router-link>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@
     <!-- Deals Section -->
     <section class="deals-section">
       <div class="container">
-        <h2 class="section-title">Special Offers</h2>
+        <h2 class="section-title">{{ t('home.deals.title') }}</h2>
         <div class="deals-grid">
           <ProductCard
             :price="960"
@@ -60,7 +60,7 @@
             :discount="20"
             :rating="4.5"
             :reviewCount="128"
-            availability="In Stock"
+            :availability="t('products.inStock')"
             @add-to-cart="addToCart"
             @toggle-favorite="toggleFavorite"
           />
@@ -82,7 +82,7 @@
             :discount="25"
             :rating="4.2"
             :reviewCount="67"
-            availability="In Stock"
+            :availability="t('products.inStock')"
             @add-to-cart="addToCart"
             @toggle-favorite="toggleFavorite"
           />
@@ -93,7 +93,7 @@
             :discount="30"
             :rating="4.7"
             :reviewCount="42"
-            availability="In Stock"
+            :availability="t('products.inStock')"
             @add-to-cart="addToCart"
             @toggle-favorite="toggleFavorite"
           />
@@ -104,25 +104,25 @@
     <!-- Services Section -->
     <section class="services-section">
       <div class="container">
-        <h2 class="section-title">Our Services</h2>
+        <h2 class="section-title">{{ t('home.services.title') }}</h2>
         <div class="services-grid">
           <div class="service-card">
             <div class="service-icon">🚚</div>
-            <h3>Delivery</h3>
-            <p>Get your materials delivered to your job site</p>
-            <router-link to="./services/delivery" class="btn btn-outline">Learn More</router-link>
+            <h3>{{ t('home.services.delivery') }}</h3>
+            <p>{{ t('home.services.deliveryDesc') || 'Get your materials delivered to your job site' }}</p>
+            <router-link to="./services/delivery" class="btn btn-outline">{{ t('home.learnMore') || 'Learn More' }}</router-link>
           </div>
           <div class="service-card">
             <div class="service-icon">🛠️</div>
-            <h3>Installation</h3>
-            <p>Professional installation services</p>
-            <router-link to="./services/installation" class="btn btn-outline">Learn More</router-link>
+            <h3>{{ t('home.services.installation') }}</h3>
+            <p>{{ t('home.services.installationDesc') || 'Professional installation services' }}</p>
+            <router-link to="./services/installation" class="btn btn-outline">{{ t('home.learnMore') || 'Learn More' }}</router-link>
           </div>
           <div class="service-card">
             <div class="service-icon">📋</div>
-            <h3>Project Management</h3>
-            <p>Let us help you manage your construction project</p>
-            <router-link to="./services/project-management" class="btn btn-outline">Learn More</router-link>
+            <h3>{{ t('home.services.design') }}</h3>
+            <p>{{ t('home.services.designDesc') || 'Let us help you manage your construction project' }}</p>
+            <router-link to="./services/project-management" class="btn btn-outline">{{ t('home.learnMore') || 'Learn More' }}</router-link>
           </div>
         </div>
       </div>
@@ -132,11 +132,11 @@
     <section class="newsletter-section">
       <div class="container">
         <div class="newsletter-content">
-          <h2>Sign Up for Our Newsletter</h2>
-          <p>Get the latest deals and product updates</p>
+          <h2>{{ t('home.newsletter.title') || 'Sign Up for Our Newsletter' }}</h2>
+          <p>{{ t('home.newsletter.subtitle') || 'Get the latest deals and product updates' }}</p>
           <div class="newsletter-form">
-            <input type="email" placeholder="Enter your email">
-            <button class="btn btn-primary">Subscribe</button>
+            <input type="email" :placeholder="t('home.newsletter.emailPlaceholder') || 'Enter your email'">
+            <button class="btn btn-primary">{{ t('home.newsletter.subscribe') || 'Subscribe' }}</button>
           </div>
         </div>
       </div>
@@ -145,8 +145,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import HeroBanner from '@/components/common/HeroBanner.vue';
 import ProductCard from '@/components/common/ProductCard.vue';
+
+const { t } = useI18n();
 
 // Event handlers
 function addToCart() {

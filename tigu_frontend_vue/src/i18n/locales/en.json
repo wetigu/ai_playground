@@ -1,0 +1,103 @@
+{
+  "app": {
+    "title": "Tigu Platform",
+    "slogan": "B2B Marketplace",
+    "promo": "Save up to 30% on Select Products - Limited Time Only!"
+  },
+  "header": {
+    "menu": "Menu",
+    "home": "Home",
+    "products": "Products",
+    "services": "Services",
+    "deals": "Deals & Specials",
+    "diy": "DIY Projects",
+    "contact": "Contact Us",
+    "search": "What can we help you find today?",
+    "account": "My Account",
+    "orders": "Orders",
+    "cart": "Cart",
+    "departments": "Departments",
+    "storeFinder": "Store Finder"
+  },
+  "footer": {
+    "customerService": "Customer Service",
+    "help": "Help Center",
+    "returns": "Returns & Refunds",
+    "orderStatus": "Order Status",
+    "contact": "Contact Us",
+    "about": "About Us",
+    "careers": "Careers",
+    "investors": "Investors",
+    "suppliers": "Suppliers",
+    "affiliates": "Affiliates",
+    "copyright": "© 2023 Tigu Platform. All rights reserved.",
+    "companyInfo": "Company Info",
+    "responsibility": "Corporate Responsibility",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "accessibility": "Accessibility",
+    "businessHours": "Mon-Sat: 8am-9pm, Sun: 9am-6pm"
+  },
+  "home": {
+    "hero": {
+      "title": "Build, Create & Transform",
+      "subtitle": "Save on must-have equipment to get your projects moving",
+      "shopNow": "Shop Now"
+    },
+    "heroBannerDesc": "Shop now for the best deals on construction materials",
+    "learnMore": "Learn More",
+    "categories": {
+      "title": "Shop Popular Categories",
+      "tools": "Tools",
+      "building": "Building Materials",
+      "plumbing": "Plumbing",
+      "electrical": "Electrical",
+      "kitchen": "Kitchen",
+      "bathroom": "Bathroom",
+      "outdoor": "Outdoor",
+      "appliances": "Appliances",
+      "doors": "Doors & Windows",
+      "furniture": "Furniture",
+      "lighting": "Lighting"
+    },
+    "deals": {
+      "title": "Special Deals",
+      "subtitle": "Limited time offers on quality products",
+      "viewMore": "View More"
+    },
+    "services": {
+      "title": "Services We Offer",
+      "installation": "Installation",
+      "installationDesc": "Professional installation services",
+      "design": "Design Services",
+      "designDesc": "Let us help you manage your construction project",
+      "delivery": "Delivery",
+      "deliveryDesc": "Get your materials delivered to your job site",
+      "rental": "Tool Rental"
+    },
+    "newsletter": {
+      "title": "Sign Up for Our Newsletter",
+      "subtitle": "Get the latest deals and product updates",
+      "emailPlaceholder": "Enter your email",
+      "subscribe": "Subscribe"
+    }
+  },
+  "products": {
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock",
+    "limitedStock": "Limited Stock",
+    "addToCart": "Add to Cart",
+    "details": "Details",
+    "specifications": "Specifications",
+    "reviews": "Reviews",
+    "relatedProducts": "Related Products",
+    "off": "OFF",
+    "new": "NEW",
+    "quickView": "Quick View",
+    "favorite": "Favorite"
+  },
+  "language": {
+    "en": "English",
+    "zh": "中文"
+  }
+} 

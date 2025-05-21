@@ -1,0 +1,103 @@
+{
+  "app": {
+    "title": "Tigu平台",
+    "slogan": "B2B市场",
+    "promo": "精选产品低至7折 - 限时优惠！"
+  },
+  "header": {
+    "menu": "菜单",
+    "home": "首页",
+    "products": "产品",
+    "services": "服务",
+    "deals": "特惠活动",
+    "diy": "DIY项目",
+    "contact": "联系我们",
+    "search": "今天我们能帮您找什么？",
+    "account": "我的账户",
+    "orders": "订单",
+    "cart": "购物车",
+    "departments": "部门分类",
+    "storeFinder": "门店查找"
+  },
+  "footer": {
+    "customerService": "客户服务",
+    "help": "帮助中心",
+    "returns": "退换货服务",
+    "orderStatus": "订单状态",
+    "contact": "联系我们",
+    "about": "关于我们",
+    "careers": "招聘",
+    "investors": "投资者",
+    "suppliers": "供应商",
+    "affiliates": "合作伙伴",
+    "copyright": "© 2023 Tigu平台。保留所有权利。",
+    "companyInfo": "公司信息",
+    "responsibility": "企业责任",
+    "privacy": "隐私政策",
+    "terms": "使用条款",
+    "accessibility": "无障碍",
+    "businessHours": "周一至周六: 8:00-21:00, 周日: 9:00-18:00"
+  },
+  "home": {
+    "hero": {
+      "title": "建造，创造与转型",
+      "subtitle": "必备设备优惠，让您的项目顺利进行",
+      "shopNow": "立即购买"
+    },
+    "heroBannerDesc": "立即选购建筑材料的最佳优惠",
+    "learnMore": "了解更多",
+    "categories": {
+      "title": "热门分类",
+      "tools": "工具",
+      "building": "建筑材料",
+      "plumbing": "水暖",
+      "electrical": "电气",
+      "kitchen": "厨房",
+      "bathroom": "浴室",
+      "outdoor": "户外",
+      "appliances": "家电",
+      "doors": "门窗",
+      "furniture": "家具",
+      "lighting": "照明"
+    },
+    "deals": {
+      "title": "特别优惠",
+      "subtitle": "优质产品限时特惠",
+      "viewMore": "查看更多"
+    },
+    "services": {
+      "title": "我们提供的服务",
+      "installation": "安装服务",
+      "installationDesc": "专业安装服务",
+      "design": "设计服务",
+      "designDesc": "让我们帮助您管理建筑项目",
+      "delivery": "送货服务",
+      "deliveryDesc": "将您的材料送到您的工地",
+      "rental": "工具租赁"
+    },
+    "newsletter": {
+      "title": "订阅我们的通讯",
+      "subtitle": "获取最新优惠和产品更新",
+      "emailPlaceholder": "输入您的邮箱",
+      "subscribe": "订阅"
+    }
+  },
+  "products": {
+    "outOfStock": "缺货",
+    "inStock": "有货",
+    "limitedStock": "库存有限",
+    "addToCart": "添加到购物车",
+    "details": "详情",
+    "specifications": "规格",
+    "reviews": "评价",
+    "relatedProducts": "相关产品",
+    "off": "折扣",
+    "new": "新品",
+    "quickView": "快速浏览",
+    "favorite": "收藏"
+  },
+  "language": {
+    "en": "English",
+    "zh": "中文"
+  }
+} 

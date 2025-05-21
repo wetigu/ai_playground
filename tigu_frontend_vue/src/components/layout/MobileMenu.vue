@@ -4,80 +4,84 @@
     
     <div class="mobile-menu-container">
       <div class="mobile-menu-header">
-        <h2>Menu</h2>
+        <h2>{{ t('header.menu') || 'Menu' }}</h2>
         <button class="close-btn" @click="closeMenu">✕</button>
       </div>
       
       <div class="mobile-menu-content">
         <div class="mobile-search">
-          <input type="text" placeholder="What can we help you find today?" aria-label="Search">
+          <input type="text" :placeholder="t('header.search')" aria-label="Search">
           <button>🔍</button>
         </div>
         
         <div class="mobile-user-actions">
           <button class="user-action-btn">
             <span class="icon">👤</span>
-            <span>My Account</span>
+            <span>{{ t('header.account') }}</span>
           </button>
           <button class="user-action-btn">
             <span class="icon">📍</span>
-            <span>Store Finder</span>
+            <span>{{ t('header.storeFinder') || 'Store Finder' }}</span>
           </button>
           <button class="user-action-btn">
             <span class="icon">🛒</span>
-            <span>Cart</span>
+            <span>{{ t('header.cart') }}</span>
           </button>
         </div>
         
         <nav class="mobile-nav">
           <ul class="mobile-nav-list">
             <li>
-              <router-link to="./shop" @click="closeMenu">All Products</router-link>
+              <router-link to="./shop" @click="closeMenu">{{ t('header.products') }}</router-link>
             </li>
             <li class="expandable">
               <div class="expand-header">
-                <router-link to="./departments">Departments</router-link>
+                <router-link to="./departments">{{ t('header.departments') || 'Departments' }}</router-link>
                 <button class="expand-btn" @click="toggleSubmenu('departments')">
                   {{ expandedMenus.includes('departments') ? '−' : '+' }}
                 </button>
               </div>
               <ul v-if="expandedMenus.includes('departments')" class="submenu">
-                <li><router-link to="./departments/building-materials" @click="closeMenu">Building Materials</router-link></li>
-                <li><router-link to="./departments/tools" @click="closeMenu">Tools</router-link></li>
-                <li><router-link to="./departments/doors-windows" @click="closeMenu">Doors & Windows</router-link></li>
-                <li><router-link to="./departments/furniture" @click="closeMenu">Furniture</router-link></li>
-                <li><router-link to="./departments/lighting" @click="closeMenu">Lighting</router-link></li>
-                <li><router-link to="./departments/electrical" @click="closeMenu">Electrical</router-link></li>
+                <li><router-link to="./departments/building-materials" @click="closeMenu">{{ t('home.categories.building') }}</router-link></li>
+                <li><router-link to="./departments/tools" @click="closeMenu">{{ t('home.categories.tools') }}</router-link></li>
+                <li><router-link to="./departments/doors-windows" @click="closeMenu">{{ t('home.categories.doors') || 'Doors & Windows' }}</router-link></li>
+                <li><router-link to="./departments/furniture" @click="closeMenu">{{ t('home.categories.furniture') || 'Furniture' }}</router-link></li>
+                <li><router-link to="./departments/lighting" @click="closeMenu">{{ t('home.categories.lighting') || 'Lighting' }}</router-link></li>
+                <li><router-link to="./departments/electrical" @click="closeMenu">{{ t('home.categories.electrical') }}</router-link></li>
               </ul>
             </li>
             <li>
-              <router-link to="./deals" @click="closeMenu">Deals & Specials</router-link>
+              <router-link to="./deals" @click="closeMenu">{{ t('header.deals') }}</router-link>
             </li>
             <li class="expandable">
               <div class="expand-header">
-                <router-link to="./services">Services</router-link>
+                <router-link to="./services">{{ t('header.services') }}</router-link>
                 <button class="expand-btn" @click="toggleSubmenu('services')">
                   {{ expandedMenus.includes('services') ? '−' : '+' }}
                 </button>
               </div>
               <ul v-if="expandedMenus.includes('services')" class="submenu">
-                <li><router-link to="./services/delivery" @click="closeMenu">Delivery</router-link></li>
-                <li><router-link to="./services/installation" @click="closeMenu">Installation</router-link></li>
-                <li><router-link to="./services/project-management" @click="closeMenu">Project Management</router-link></li>
+                <li><router-link to="./services/delivery" @click="closeMenu">{{ t('home.services.delivery') }}</router-link></li>
+                <li><router-link to="./services/installation" @click="closeMenu">{{ t('home.services.installation') }}</router-link></li>
+                <li><router-link to="./services/project-management" @click="closeMenu">{{ t('home.services.design') }}</router-link></li>
               </ul>
             </li>
             <li>
-              <router-link to="./ideas" @click="closeMenu">Ideas & Inspiration</router-link>
+              <router-link to="./ideas" @click="closeMenu">{{ t('header.diy') }}</router-link>
             </li>
           </ul>
         </nav>
+        
+        <div class="language-switcher-container">
+          <LanguageSwitcher />
+        </div>
       </div>
       
       <div class="mobile-menu-footer">
         <div class="contact-info">
-          <h3>Customer Service</h3>
+          <h3>{{ t('footer.customerService') }}</h3>
           <p>1-800-555-1234</p>
-          <p>Mon-Sat: 8am-9pm, Sun: 9am-6pm</p>
+          <p>{{ t('footer.businessHours') || 'Mon-Sat: 8am-9pm, Sun: 9am-6pm' }}</p>
         </div>
       </div>
     </div>
@@ -86,7 +90,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 
+const { t } = useI18n();
 const { isActive } = defineProps<{
   isActive: boolean
 }>();
@@ -340,5 +347,11 @@ $animation-duration: 0.3s;
       color: #666;
     }
   }
+}
+
+.language-switcher-container {
+  margin-top: 20px;
+  padding: 10px 0;
+  border-top: 1px solid $border-color;
 }
 </style> 

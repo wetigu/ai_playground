@@ -3,17 +3,20 @@
     <header class="header">
       <div class="top-banner">
         <div class="container">
-          <div class="promo-message">Save up to 30% on Select Products - Limited Time Only!</div>
+          <div class="promo-message">{{ t('app.promo') || 'Save up to 30% on Select Products - Limited Time Only!' }}</div>
+          <div class="language-selector">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
       <div class="header-main container">
         <div class="logo">
           <router-link to="./">
-            <h1>Tigu</h1>
+            <h1>{{ t('app.title') }}</h1>
           </router-link>
         </div>
         <div class="search-bar">
-          <input type="text" placeholder="What can we help you find today?" aria-label="Search">
+          <input type="text" :placeholder="t('header.search')" aria-label="Search">
           <button class="search-button">
             <span class="icon">🔍</span>
           </button>
@@ -21,15 +24,15 @@
         <div class="header-actions">
           <button class="location-btn">
             <span class="icon">📍</span> 
-            <span class="text">Store Finder</span>
+            <span class="text">{{ t('header.storeFinder') || 'Store Finder' }}</span>
           </button>
           <button class="account-btn">
             <span class="icon">👤</span>
-            <span class="text">My Account</span>
+            <span class="text">{{ t('header.account') }}</span>
           </button>
           <button class="cart-btn">
             <span class="icon">🛒</span>
-            <span class="text">Cart</span>
+            <span class="text">{{ t('header.cart') }}</span>
           </button>
         </div>
         <button class="mobile-menu-btn" @click="openMobileMenu">
@@ -39,11 +42,11 @@
       <nav class="main-nav">
         <div class="container">
           <ul class="nav-list">
-            <li><router-link to="./shop">All Products</router-link></li>
-            <li><router-link to="./departments">Departments</router-link></li>
-            <li><router-link to="./deals">Deals & Specials</router-link></li>
-            <li><router-link to="./services">Services</router-link></li>
-            <li><router-link to="./ideas">Ideas & Inspiration</router-link></li>
+            <li><router-link to="./shop">{{ t('header.products') }}</router-link></li>
+            <li><router-link to="./departments">{{ t('header.departments') || 'Departments' }}</router-link></li>
+            <li><router-link to="./deals">{{ t('header.deals') }}</router-link></li>
+            <li><router-link to="./services">{{ t('header.services') }}</router-link></li>
+            <li><router-link to="./ideas">{{ t('header.diy') }}</router-link></li>
           </ul>
         </div>
       </nav>
@@ -57,21 +60,21 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-section">
-            <h4>Customer Service</h4>
+            <h4>{{ t('footer.customerService') }}</h4>
             <ul>
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">Order Status</a></li>
-              <li><a href="#">Returns & Refunds</a></li>
-              <li><a href="#">Contact Us</a></li>
+              <li><a href="#">{{ t('footer.help') }}</a></li>
+              <li><a href="#">{{ t('footer.orderStatus') }}</a></li>
+              <li><a href="#">{{ t('footer.returns') }}</a></li>
+              <li><a href="#">{{ t('footer.contact') }}</a></li>
             </ul>
           </div>
           <div class="footer-section">
-            <h4>About Us</h4>
+            <h4>{{ t('footer.about') }}</h4>
             <ul>
-              <li><a href="#">Company Info</a></li>
-              <li><a href="#">Careers</a></li>
-              <li><a href="#">Corporate Responsibility</a></li>
-              <li><a href="#">Investor Relations</a></li>
+              <li><a href="#">{{ t('footer.companyInfo') || 'Company Info' }}</a></li>
+              <li><a href="#">{{ t('footer.careers') }}</a></li>
+              <li><a href="#">{{ t('footer.responsibility') || 'Corporate Responsibility' }}</a></li>
+              <li><a href="#">{{ t('footer.investors') }}</a></li>
             </ul>
           </div>
           <div class="footer-section">
@@ -102,11 +105,11 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; {{ currentYear }} Tigu Platform. All rights reserved.</p>
+          <p>{{ t('footer.copyright') }}</p>
           <div class="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Use</a>
-            <a href="#">Accessibility</a>
+            <a href="#">{{ t('footer.privacy') || 'Privacy Policy' }}</a>
+            <a href="#">{{ t('footer.terms') || 'Terms of Use' }}</a>
+            <a href="#">{{ t('footer.accessibility') || 'Accessibility' }}</a>
           </div>
         </div>
       </div>
@@ -119,8 +122,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import MobileMenu from '@/components/layout/MobileMenu.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 
+const { t } = useI18n();
 const currentYear = computed(() => new Date().getFullYear());
 const mobileMenuActive = ref(false);
 

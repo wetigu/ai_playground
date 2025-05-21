@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   return {
+    // Use relative paths instead of absolute
+    base: './',
     plugins: [
       vue(),
       // PWA plugin configuration
@@ -20,14 +22,15 @@ export default defineConfig(({ mode }) => {
           short_name: 'Tigu',
           description: 'Tigu Platform - B2B Marketplace',
           theme_color: '#ffffff',
+          start_url: './',
           icons: [
             {
-              src: 'pwa-192x192.png',
+              src: './pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
+              src: './pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png'
             }

@@ -8,7 +8,7 @@
       </div>
       <div class="header-main container">
         <div class="logo">
-          <router-link to="/">
+          <router-link to="./">
             <h1>Tigu</h1>
           </router-link>
         </div>
@@ -39,11 +39,11 @@
       <nav class="main-nav">
         <div class="container">
           <ul class="nav-list">
-            <li><router-link to="/shop">All Products</router-link></li>
-            <li><router-link to="/departments">Departments</router-link></li>
-            <li><router-link to="/deals">Deals & Specials</router-link></li>
-            <li><router-link to="/services">Services</router-link></li>
-            <li><router-link to="/ideas">Ideas & Inspiration</router-link></li>
+            <li><router-link to="./shop">All Products</router-link></li>
+            <li><router-link to="./departments">Departments</router-link></li>
+            <li><router-link to="./deals">Deals & Specials</router-link></li>
+            <li><router-link to="./services">Services</router-link></li>
+            <li><router-link to="./ideas">Ideas & Inspiration</router-link></li>
           </ul>
         </div>
       </nav>
@@ -137,7 +137,7 @@ function closeMobileMenu() {
 // Check if the service worker is registered
 onMounted(() => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('./sw.js')
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

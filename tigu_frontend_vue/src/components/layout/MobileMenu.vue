@@ -32,42 +32,42 @@
         <nav class="mobile-nav">
           <ul class="mobile-nav-list">
             <li>
-              <router-link to="/shop" @click="closeMenu">All Products</router-link>
+              <router-link to="./shop" @click="closeMenu">All Products</router-link>
             </li>
             <li class="expandable">
               <div class="expand-header">
-                <router-link to="/departments">Departments</router-link>
+                <router-link to="./departments">Departments</router-link>
                 <button class="expand-btn" @click="toggleSubmenu('departments')">
                   {{ expandedMenus.includes('departments') ? '−' : '+' }}
                 </button>
               </div>
               <ul v-if="expandedMenus.includes('departments')" class="submenu">
-                <li><router-link to="/departments/building-materials" @click="closeMenu">Building Materials</router-link></li>
-                <li><router-link to="/departments/tools" @click="closeMenu">Tools</router-link></li>
-                <li><router-link to="/departments/doors-windows" @click="closeMenu">Doors & Windows</router-link></li>
-                <li><router-link to="/departments/furniture" @click="closeMenu">Furniture</router-link></li>
-                <li><router-link to="/departments/lighting" @click="closeMenu">Lighting</router-link></li>
-                <li><router-link to="/departments/electrical" @click="closeMenu">Electrical</router-link></li>
+                <li><router-link to="./departments/building-materials" @click="closeMenu">Building Materials</router-link></li>
+                <li><router-link to="./departments/tools" @click="closeMenu">Tools</router-link></li>
+                <li><router-link to="./departments/doors-windows" @click="closeMenu">Doors & Windows</router-link></li>
+                <li><router-link to="./departments/furniture" @click="closeMenu">Furniture</router-link></li>
+                <li><router-link to="./departments/lighting" @click="closeMenu">Lighting</router-link></li>
+                <li><router-link to="./departments/electrical" @click="closeMenu">Electrical</router-link></li>
               </ul>
             </li>
             <li>
-              <router-link to="/deals" @click="closeMenu">Deals & Specials</router-link>
+              <router-link to="./deals" @click="closeMenu">Deals & Specials</router-link>
             </li>
             <li class="expandable">
               <div class="expand-header">
-                <router-link to="/services">Services</router-link>
+                <router-link to="./services">Services</router-link>
                 <button class="expand-btn" @click="toggleSubmenu('services')">
                   {{ expandedMenus.includes('services') ? '−' : '+' }}
                 </button>
               </div>
               <ul v-if="expandedMenus.includes('services')" class="submenu">
-                <li><router-link to="/services/delivery" @click="closeMenu">Delivery</router-link></li>
-                <li><router-link to="/services/installation" @click="closeMenu">Installation</router-link></li>
-                <li><router-link to="/services/project-management" @click="closeMenu">Project Management</router-link></li>
+                <li><router-link to="./services/delivery" @click="closeMenu">Delivery</router-link></li>
+                <li><router-link to="./services/installation" @click="closeMenu">Installation</router-link></li>
+                <li><router-link to="./services/project-management" @click="closeMenu">Project Management</router-link></li>
               </ul>
             </li>
             <li>
-              <router-link to="/ideas" @click="closeMenu">Ideas & Inspiration</router-link>
+              <router-link to="./ideas" @click="closeMenu">Ideas & Inspiration</router-link>
             </li>
           </ul>
         </nav>
@@ -87,7 +87,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const props = defineProps<{
+const { isActive } = defineProps<{
   isActive: boolean
 }>();
 

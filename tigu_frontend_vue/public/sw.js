@@ -2,14 +2,14 @@
 
 const CACHE_NAME = 'tigu-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/favicon.ico',
-  '/pwa-192x192.png',
-  '/pwa-512x512.png',
-  '/apple-touch-icon.png',
-  '/masked-icon.svg',
-  '/images/hero-bg.jpg'
+  './',
+  './index.html',
+  './favicon.ico',
+  './pwa-192x192.png',
+  './pwa-512x512.png',
+  './apple-touch-icon.png',
+  './masked-icon.svg',
+  './images/hero-bg.jpg'
 ];
 
 // Install the service worker and cache assets

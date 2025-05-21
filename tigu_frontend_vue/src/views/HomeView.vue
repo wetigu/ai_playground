@@ -6,7 +6,7 @@
       subtitle="Up to 30% off select products"
       description="Shop now for the best deals on construction materials"
       buttonText="Shop Now"
-      buttonLink="/shop"
+      buttonLink="./shop"
     />
 
     <!-- Categories Section -->
@@ -17,32 +17,32 @@
           <div class="category-card">
             <div class="category-img">🧱</div>
             <h3>Building Materials</h3>
-            <router-link to="/category/building-materials">Shop Now</router-link>
+            <router-link to="./category/building-materials">Shop Now</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔨</div>
             <h3>Tools</h3>
-            <router-link to="/category/tools">Shop Now</router-link>
+            <router-link to="./category/tools">Shop Now</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🚪</div>
             <h3>Doors & Windows</h3>
-            <router-link to="/category/doors-windows">Shop Now</router-link>
+            <router-link to="./category/doors-windows">Shop Now</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🪑</div>
             <h3>Furniture</h3>
-            <router-link to="/category/furniture">Shop Now</router-link>
+            <router-link to="./category/furniture">Shop Now</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">💡</div>
             <h3>Lighting</h3>
-            <router-link to="/category/lighting">Shop Now</router-link>
+            <router-link to="./category/lighting">Shop Now</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔌</div>
             <h3>Electrical</h3>
-            <router-link to="/category/electrical">Shop Now</router-link>
+            <router-link to="./category/electrical">Shop Now</router-link>
           </div>
         </div>
       </div>
@@ -110,19 +110,19 @@
             <div class="service-icon">🚚</div>
             <h3>Delivery</h3>
             <p>Get your materials delivered to your job site</p>
-            <router-link to="/services/delivery" class="btn btn-outline">Learn More</router-link>
+            <router-link to="./services/delivery" class="btn btn-outline">Learn More</router-link>
           </div>
           <div class="service-card">
             <div class="service-icon">🛠️</div>
             <h3>Installation</h3>
             <p>Professional installation services</p>
-            <router-link to="/services/installation" class="btn btn-outline">Learn More</router-link>
+            <router-link to="./services/installation" class="btn btn-outline">Learn More</router-link>
           </div>
           <div class="service-card">
             <div class="service-icon">📋</div>
             <h3>Project Management</h3>
             <p>Let us help you manage your construction project</p>
-            <router-link to="/services/project-management" class="btn btn-outline">Learn More</router-link>
+            <router-link to="./services/project-management" class="btn btn-outline">Learn More</router-link>
           </div>
         </div>
       </div>

@@ -26,12 +26,12 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  backgroundImage: '/images/hero-bg.jpg',
+  backgroundImage: './images/hero-bg.jpg',
   title: '',
   subtitle: '',
   description: '',
   buttonText: '',
-  buttonLink: '/'
+  buttonLink: './'
 });
 
 const backgroundStyle = computed(() => {

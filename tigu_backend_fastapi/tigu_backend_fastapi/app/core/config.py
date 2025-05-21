@@ -2,6 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 from typing import List, Union
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
 load_dotenv()
 

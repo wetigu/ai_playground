@@ -23,10 +23,10 @@ FastAPI backend for the Tigu platform.
 
 ## Setup
 
-1.  Clone the repository.
+1.  Clone the repository, run pip install -r requirements.txt
 2.  Create a virtual environment and install dependencies:
     ```bash
-    poetry install
+    poetry install (if error: run poetry shell, then poetry add pydantic-settings)
     ```
 3.  Copy `.env.example` to `.env` and update the variables.
 4.  Run database migrations:

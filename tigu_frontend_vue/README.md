@@ -1,7 +1,7 @@
 # tigu_platform_frontend
 
 Vue.js + PWA frontend for the Tigu platform.
-
+# npm install vue-i18@next need to run in order for the project to work
 ## Project Structure
 
 - `public/`: Static assets that will be served as-is.

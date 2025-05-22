@@ -257,7 +257,7 @@ $animation-duration: 0.3s;
     }
     
     &:hover {
-      background-color: darken($light-gray, 5%);
+      background-color: #e8e9eb; /* Slightly darker shade of light gray */
     }
   }
 }

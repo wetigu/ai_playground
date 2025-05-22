@@ -105,7 +105,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>{{ t('footer.copyright') }}</p>
+          <p>{{ t('footer.copyright', { year: currentYear }) }}</p>
           <div class="footer-links">
             <a href="#">{{ t('footer.privacy') || 'Privacy Policy' }}</a>
             <a href="#">{{ t('footer.terms') || 'Terms of Use' }}</a>
@@ -155,8 +155,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-// Import base styles
-@import '@/assets/styles/main.scss';
+// Use modern Sass directive with explicit namespace
+@use '@/assets/styles/main.scss';
 
 // Variables
 $primary-color: #f96302; // Home Depot orange

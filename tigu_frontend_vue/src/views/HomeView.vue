@@ -192,7 +192,7 @@ $breakpoint-sm: 576px;
     color: $white;
     
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: #e05602; /* Darker shade of primary color */
     }
   }
   
@@ -201,7 +201,7 @@ $breakpoint-sm: 576px;
     color: $white;
     
     &:hover {
-      background-color: darken($secondary-color, 10%);
+      background-color: #084a86; /* Darker shade of secondary color */
     }
   }
   

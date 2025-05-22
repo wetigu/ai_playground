@@ -30,7 +30,7 @@
     "investors": "Investors",
     "suppliers": "Suppliers",
     "affiliates": "Affiliates",
-    "copyright": "© 2023 Tigu Platform. All rights reserved.",
+    "copyright": "© {year} Tigu Platform. All rights reserved.",
     "companyInfo": "Company Info",
     "responsibility": "Corporate Responsibility",
     "privacy": "Privacy Policy",

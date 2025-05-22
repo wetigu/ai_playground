@@ -38,6 +38,14 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
+    css: {
+      devSourcemap: true,
+      preprocessorOptions: {
+        scss: {
+          charset: false
+        }
+      }
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))

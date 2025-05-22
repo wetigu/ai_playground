@@ -317,7 +317,7 @@ $star-color: #ffc107;
       transition: background-color 0.3s ease;
       
       &:hover {
-        background-color: darken($primary-color, 10%);
+        background-color: #e05602; /* Darker shade of primary color instead of using darken() */
       }
     }
     

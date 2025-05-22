@@ -1,0 +1,14 @@
+// Sass functions and mixins
+@function lightness($color, $amount) {
+  @return mix(white, $color, $amount);
+}
+
+@function darkness($color, $amount) {
+  @return mix(black, $color, $amount);
+}
+
+@mixin respond-to($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+} 

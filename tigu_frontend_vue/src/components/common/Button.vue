@@ -50,7 +50,7 @@ defineEmits(['click']);
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken(#42b983, 10%);
+      background-color: #3aa876;
     }
   }
   
@@ -59,7 +59,7 @@ defineEmits(['click']);
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken(#6c757d, 10%);
+      background-color: #5a6268;
     }
   }
   
@@ -68,7 +68,7 @@ defineEmits(['click']);
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken(#dc3545, 10%);
+      background-color: #c82333;
     }
   }
   
@@ -77,7 +77,7 @@ defineEmits(['click']);
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken(#28a745, 10%);
+      background-color: #218838;
     }
   }
   

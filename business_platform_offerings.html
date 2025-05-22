@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建材B2B平台功能概览</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+            margin: 0;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 95%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .mermaid {
+            font-size: 16px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .btn {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background-color: #ddd;
+        }
+        .btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+        .core-color { background-color: #ff9aa2; }
+        .service-color { background-color: #b5ead7; }
+        .tech-color { background-color: #ffdac1; }
+        .business-color { background-color: #e2c6ff; }
+        .plan-color { background-color: #c7ceea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>建材B2B平台功能概览</h1>
+        
+        <div class="controls">
+            <button class="btn active" id="showAll">显示全部</button>
+            <button class="btn" id="showMVP">仅显示MVP阶段</button>
+            <button class="btn" id="showLater">仅显示后期功能</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color core-color"></div>核心功能模块</div>
+            <div class="legend-item"><div class="legend-color service-color"></div>特色服务模块</div>
+            <div class="legend-item"><div class="legend-color tech-color"></div>技术基础</div>
+            <div class="legend-item"><div class="legend-color business-color"></div>运营模式</div>
+            <div class="legend-item"><div class="legend-color plan-color"></div>发展规划</div>
+        </div>
+        
+        <div class="mermaid">
+            %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'primaryColor': '#ffccdd', 'primaryTextColor': '#000', 'edgeLabelBackground': '#ffffff' }}}%%
+            flowchart LR
+                平台["建材B2B平台"]
+                
+                %% 主要类别
+                平台 --> 核心功能["核心功能<br>模块"]
+                平台 --> 特色服务["特色服务<br>模块"]
+                平台 --> 运营模式["运营<br>模式"]
+                平台 --> 技术基础["技术<br>基础"]
+                平台 --> 发展规划["发展<br>规划"]
+                
+                %% 核心功能子节点
+                subgraph 核心功能模块
+                    产品展示["产品SKU矩阵与展示"]
+                    商家入驻["商家入驻与管理"]
+                    订单处理["订单处理与拆分"]
+                    客户系统["客户管理与账期"]
+                end
+                
+                核心功能 --> 产品展示
+                核心功能 --> 商家入驻
+                核心功能 --> 订单处理
+                核心功能 --> 客户系统
+                
+                %% 核心功能的二级子节点
+                产品展示 --> 品类管理["品类管理"]
+                商家入驻 --> 供应商管理["供应商管理"]
+                订单处理 --> 结算系统["结算系统"]
+                客户系统 --> 对账系统["对账单导出"]
+                
+                %% 特色服务子节点
+                subgraph 特色服务模块
+                    数据分析["数据驱动<br>采购决策"]
+                    物流协同["物流协同<br>系统"]
+                    信用风控["信用与<br>风控体系"]
+                    支付服务["支付服务<br>集成"]
+                    技术支持["技术支持<br>工具"]
+                end
+                
+                特色服务 --> 数据分析
+                特色服务 --> 物流协同
+                特色服务 --> 信用风控
+                特色服务 --> 支付服务
+                特色服务 --> 技术支持
+                
+                %% 特色服务的二级子节点
+                数据分析 --> 推荐系统["供应商产品推荐"]
+                物流协同 --> 配送管理["配送协调系统"]
+                信用风控 --> 授信系统["银行授信对接"]
+                支付服务 --> 支付网关["支付网关"]
+                技术支持 --> 成本测算["成本测算工具"]
+                
+                %% 运营模式子节点
+                subgraph 运营模式节点
+                    盈利模式["平台抽成<br>与服务费"]
+                    垂直细分["垂直<br>细分人群"]
+                    采购联盟["专业<br>采购联盟"]
+                end
+                
+                运营模式 --> 盈利模式
+                运营模式 --> 垂直细分
+                运营模式 --> 采购联盟
+                
+                %% 技术基础子节点
+                subgraph 技术基础节点
+                    PWAAPP["PWA Web应用"]
+                    云部署["AWS/Azure部署"]
+                    AI辅助["AI辅助开发"]
+                end
+                
+                技术基础 --> PWAAPP
+                技术基础 --> 云部署
+                技术基础 --> AI辅助
+                
+                %% 发展规划子节点
+                subgraph 发展规划节点
+                    试点推广["区域试点<br>推广"]
+                    品类扩展["全品类<br>扩展"]
+                    服务升级["增值服务<br>升级"]
+                end
+                
+                发展规划 --> 试点推广
+                发展规划 --> 品类扩展
+                发展规划 --> 服务升级
+                
+                %% 分组
+                subgraph MVP["MVP阶段功能"]
+                    产品展示
+                    商家入驻
+                    订单处理
+                    配送管理
+                    对账系统
+                end
+                
+                subgraph 后期["后期开发功能"]
+                    推荐系统
+                    授信系统
+                    品类扩展
+                    服务升级
+                end
+                
+                %% 样式定义
+                classDef core fill:#ff9aa2,stroke:#333,stroke-width:1.5px,color:#333,font-weight:bold;
+                classDef service fill:#b5ead7,stroke:#333,stroke-width:1.5px,color:#333;
+                classDef tech fill:#ffdac1,stroke:#333,stroke-width:1.5px,color:#333;
+                classDef business fill:#e2c6ff,stroke:#333,stroke-width:1.5px,color:#333;
+                classDef plan fill:#c7ceea,stroke:#333,stroke-width:1.5px,color:#333;
+                classDef mainNode fill:#fff0f3,stroke:#ff6b6b,stroke-width:2px,color:#333,font-weight:bold;
+                classDef mvp stroke-dasharray: 5 5;
+                
+                %% 应用样式
+                class 核心功能,产品展示,商家入驻,订单处理,客户系统,品类管理,供应商管理,结算系统,对账系统 core;
+                class 特色服务,数据分析,物流协同,信用风控,支付服务,技术支持,推荐系统,配送管理,授信系统,支付网关,成本测算 service;
+                class 技术基础,PWAAPP,云部署,AI辅助 tech;
+                class 运营模式,盈利模式,垂直细分,采购联盟 business;
+                class 发展规划,试点推广,品类扩展,服务升级 plan;
+                class 平台,核心功能模块,特色服务模块,运营模式节点,技术基础节点,发展规划节点 mainNode;
+                class MVP,后期 mvp;
+        </div>
+    </div>
+
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                rankSpacing: 80,
+                nodeSpacing: 50
+            },
+            securityLevel: 'loose'
+        });
+        
+        // 页面加载完成后添加按钮功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const showAll = document.getElementById('showAll');
+            const showMVP = document.getElementById('showMVP');
+            const showLater = document.getElementById('showLater');
+            
+            // 等待Mermaid渲染完成
+            setTimeout(() => {
+                const allSvgNodes = document.querySelectorAll('.mermaid svg .node');
+                const mvpNodes = ['产品展示', '商家入驻', '订单处理', '配送管理', '对账系统'];
+                const laterNodes = ['推荐系统', '授信系统', '品类扩展', '服务升级'];
+                
+                // 显示全部节点
+                showAll.addEventListener('click', function() {
+                    setActiveButton(showAll);
+                    allSvgNodes.forEach(node => {
+                        node.style.opacity = '1';
+                    });
+                });
+                
+                // 只显示MVP阶段节点
+                showMVP.addEventListener('click', function() {
+                    setActiveButton(showMVP);
+                    highlightNodes(mvpNodes, allSvgNodes);
+                });
+                
+                // 只显示后期功能节点  
+                showLater.addEventListener('click', function() {
+                    setActiveButton(showLater);
+                    highlightNodes(laterNodes, allSvgNodes);
+                });
+            }, 1000);
+            
+            // 设置按钮激活状态
+            function setActiveButton(activeBtn) {
+                [showAll, showMVP, showLater].forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                activeBtn.classList.add('active');
+            }
+            
+            // 高亮指定节点
+            function highlightNodes(nodeNames, allNodes) {
+                allNodes.forEach(node => {
+                    const text = node.textContent.trim();
+                    if (nodeNames.some(name => text.includes(name))) {
+                        node.style.opacity = '1';
+                    } else {
+                        node.style.opacity = '0.3';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

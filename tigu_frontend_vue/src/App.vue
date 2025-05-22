@@ -117,6 +117,9 @@
     
     <!-- Mobile Menu -->
     <MobileMenu :is-active="mobileMenuActive" @close="closeMobileMenu" />
+    
+    <!-- PWA Install Prompt -->
+    <InstallPrompt />
   </div>
 </template>
 
@@ -125,6 +128,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MobileMenu from '@/components/layout/MobileMenu.vue';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
+import InstallPrompt from '@/components/pwa/InstallPrompt.vue';
 
 const { t } = useI18n();
 const currentYear = computed(() => new Date().getFullYear());

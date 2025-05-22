@@ -99,5 +99,11 @@
   "language": {
     "en": "English",
     "zh": "中文"
+  },
+  "pwa": {
+    "installTitle": "安装Tigu平台",
+    "installSubtitle": "获得更快速的访问体验",
+    "installButton": "安装",
+    "laterButton": "稍后"
   }
 } 

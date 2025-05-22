@@ -99,5 +99,11 @@
   "language": {
     "en": "English",
     "zh": "中文"
+  },
+  "pwa": {
+    "installTitle": "Install Tigu Platform",
+    "installSubtitle": "Get our app for faster access",
+    "installButton": "Install",
+    "laterButton": "Later"
   }
 } 

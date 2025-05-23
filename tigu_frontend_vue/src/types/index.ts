@@ -15,11 +15,22 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  category: string;
-  imageUrl?: string;
+  category_id: number;
+  image_url: string;
   inStock: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
+  slug: string;
+  parent_id?: number;
+  image_url?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Order {

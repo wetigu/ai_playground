@@ -42,7 +42,7 @@
                 </button>
               </div>
               <ul v-if="expandedMenus.includes('departments')" class="submenu">
-                <li><router-link to="./departments/building-materials" @click="closeMenu">{{ t('home.categories.building') }}</router-link></li>
+                <li><router-link to="/category/building-materials" @click="closeMenu">{{ t('home.categories.building') }}</router-link></li>
                 <li><router-link to="./departments/tools" @click="closeMenu">{{ t('home.categories.tools') }}</router-link></li>
                 <li><router-link to="./departments/doors-windows" @click="closeMenu">{{ t('home.categories.doors') || 'Doors & Windows' }}</router-link></li>
                 <li><router-link to="./departments/furniture" @click="closeMenu">{{ t('home.categories.furniture') || 'Furniture' }}</router-link></li>

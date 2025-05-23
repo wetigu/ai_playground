@@ -17,32 +17,32 @@
           <div class="category-card">
             <div class="category-img">🧱</div>
             <h3>{{ t('home.categories.building') }}</h3>
-            <router-link to="./category/building-materials">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/building-materials">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔨</div>
             <h3>{{ t('home.categories.tools') }}</h3>
-            <router-link to="./category/tools">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/tools">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🚪</div>
             <h3>{{ t('home.categories.doors') }}</h3>
-            <router-link to="./category/doors-windows">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/doors-windows">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🪑</div>
             <h3>{{ t('home.categories.furniture') }}</h3>
-            <router-link to="./category/furniture">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/furniture">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">💡</div>
             <h3>{{ t('home.categories.lighting') }}</h3>
-            <router-link to="./category/lighting">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/lighting">{{ t('home.hero.shopNow') }}</router-link>
           </div>
           <div class="category-card">
             <div class="category-img">🔌</div>
             <h3>{{ t('home.categories.electrical') }}</h3>
-            <router-link to="./category/electrical">{{ t('home.hero.shopNow') }}</router-link>
+            <router-link to="/category/electrical">{{ t('home.hero.shopNow') }}</router-link>
           </div>
         </div>
       </div>

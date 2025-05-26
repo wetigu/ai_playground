@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tigu平台商家管理系统 - 商业模式图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .chart-section {
+            margin-bottom: 40px;
+        }
+        
+        .chart-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .mermaid {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .feature-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .feature-card li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .revenue-model {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        
+        .revenue-model h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 Tigu平台商家管理系统</h1>
+            <p>参考亚马逊模式的建材B2B平台商业架构</p>
+        </div>
+        
+        <div class="content">
+            <!-- 整体商业模式流程图 -->
+            <div class="chart-section">
+                <h2 class="chart-title">📊 整体商业模式流程</h2>
+                <div class="mermaid">
+                    graph TB
+                        A[商家申请入驻] --> B{平台审核}
+                        B -->|通过| C[签署入驻协议]
+                        B -->|拒绝| D[申请被拒绝]
+                        C --> E[商家店铺开通]
+                        E --> F[产品上架管理]
+                        F --> G[订单处理]
+                        G --> H[物流配送]
+                        H --> I[收款分成]
+                        I --> J[售后服务]
+                        
+                        K[客户浏览] --> L[下单购买]
+                        L --> G
+                        
+                        M[平台运营] --> N[流量推广]
+                        M --> O[技术支持]
+                        M --> P[客服支持]
+                        
+                        N --> K
+                        O --> F
+                        P --> J
+                        
+                        style A fill:#e1f5fe
+                        style E fill:#c8e6c9
+                        style I fill:#fff3e0
+                        style K fill:#f3e5f5
+                </div>
+            </div>
+
+            <!-- 商家入驻流程 -->
+            <div class="chart-section">
+                <h2 class="chart-title">🚀 商家入驻详细流程</h2>
+                <div class="mermaid">
+                    sequenceDiagram
+                        participant 商家 as 🏢 商家
+                        participant 平台 as 🌐 Tigu平台
+                        participant 审核 as 👨‍💼 审核团队
+                        participant 系统 as 💻 系统
+                        
+                        商家->>平台: 1. 提交入驻申请
+                        Note over 商家,平台: 营业执照、资质证明、产品信息
+                        
+                        平台->>审核: 2. 转交审核团队
+                        审核->>审核: 3. 资质审核
+                        Note over 审核: 企业资质、产品合规性、信用评估
+                        
+                        alt 审核通过
+                            审核->>平台: 4a. 审核通过
+                            平台->>商家: 5a. 发送入驻协议
+                            商家->>平台: 6a. 签署协议
+                            平台->>系统: 7a. 创建商家账户
+                            系统->>商家: 8a. 开通店铺后台
+                        else 审核不通过
+                            审核->>平台: 4b. 审核不通过
+                            平台->>商家: 5b. 通知拒绝原因
+                        end
+                        
+                        商家->>系统: 9. 完善店铺信息
+                        商家->>系统: 10. 上传产品
+                        系统->>平台: 11. 店铺正式上线
+                </div>
+            </div>
+
+            <!-- 产品管理流程 -->
+            <div class="chart-section">
+                <h2 class="chart-title">📦 产品管理系统</h2>
+                <div class="mermaid">
+                    graph LR
+                        A[商家登录] --> B[产品管理后台]
+                        B --> C[新增产品]
+                        B --> D[编辑产品]
+                        B --> E[库存管理]
+                        B --> F[价格管理]
+                        B --> G[促销活动]
+                        
+                        C --> H{平台审核}
+                        D --> H
+                        H -->|通过| I[产品上架]
+                        H -->|拒绝| J[修改重提]
+                        J --> H
+                        
+                        I --> K[客户可见]
+                        E --> L[库存预警]
+                        F --> M[价格监控]
+                        G --> N[活动推广]
+                        
+                        K --> O[产生订单]
+                        O --> P[订单处理]
+                        
+                        style A fill:#e3f2fd
+                        style I fill:#e8f5e8
+                        style O fill:#fff3e0
+                        style P fill:#fce4ec
+                </div>
+            </div>
+
+            <!-- 订单处理流程 -->
+            <div class="chart-section">
+                <h2 class="chart-title">🛒 订单处理与分成模式</h2>
+                <div class="mermaid">
+                    graph TD
+                        A[客户下单] --> B[订单生成]
+                        B --> C[支付完成]
+                        C --> D[订单分发给商家]
+                        D --> E[商家确认订单]
+                        E --> F[商家发货]
+                        F --> G[物流跟踪]
+                        G --> H[客户收货]
+                        H --> I[确认收货]
+                        I --> J[资金结算]
+                        
+                        J --> K[平台抽成]
+                        J --> L[商家收款]
+                        
+                        K --> M[平台服务费<br/>5-15%]
+                        K --> N[技术服务费<br/>2-5%]
+                        K --> O[推广费用<br/>1-3%]
+                        
+                        L --> P[商家净收入<br/>77-92%]
+                        
+                        Q[售后服务] --> R[退换货处理]
+                        R --> S[资金调整]
+                        
+                        H --> Q
+                        
+                        style C fill:#c8e6c9
+                        style J fill:#fff3e0
+                        style M fill:#ffcdd2
+                        style P fill:#dcedc8
+                </div>
+            </div>
+
+            <!-- 平台生态系统 -->
+            <div class="chart-section">
+                <h2 class="chart-title">🌟 平台生态系统架构</h2>
+                <div class="mermaid">
+                    mindmap
+                        root((Tigu平台))
+                            商家端
+                                店铺管理
+                                    店铺装修
+                                    品牌展示
+                                    客服系统
+                                产品管理
+                                    产品上架
+                                    库存管理
+                                    价格策略
+                                订单管理
+                                    订单处理
+                                    发货管理
+                                    售后服务
+                                数据分析
+                                    销售报表
+                                    客户分析
+                                    市场趋势
+                            客户端
+                                产品浏览
+                                    分类搜索
+                                    产品对比
+                                    评价查看
+                                购买流程
+                                    下单支付
+                                    物流跟踪
+                                    收货确认
+                                客户服务
+                                    在线客服
+                                    售后申请
+                                    投诉建议
+                            平台运营
+                                商家管理
+                                    入驻审核
+                                    资质管理
+                                    违规处理
+                                营销推广
+                                    流量分配
+                                    广告投放
+                                    活动策划
+                                技术支持
+                                    系统维护
+                                    功能升级
+                                    安全保障
+                                客户服务
+                                    纠纷处理
+                                    质量监控
+                                    用户体验
+                </div>
+            </div>
+
+            <!-- 收益模式详解 -->
+            <div class="revenue-model">
+                <h3>💰 平台收益模式</h3>
+                <div class="mermaid">
+                    pie title 平台收入来源分布
+                        "交易佣金" : 45
+                        "广告推广费" : 25
+                        "技术服务费" : 15
+                        "增值服务费" : 10
+                        "其他收入" : 5
+                </div>
+            </div>
+
+            <!-- 功能特性 -->
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🏪 商家功能</h3>
+                    <ul>
+                        <li>店铺装修与品牌展示</li>
+                        <li>产品批量上传与管理</li>
+                        <li>智能库存预警系统</li>
+                        <li>多样化价格策略</li>
+                        <li>订单自动化处理</li>
+                        <li>数据分析与报表</li>
+                        <li>客户关系管理</li>
+                        <li>营销工具与促销</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>👥 客户功能</h3>
+                    <ul>
+                        <li>智能产品搜索与筛选</li>
+                        <li>产品对比与评价系统</li>
+                        <li>一站式采购体验</li>
+                        <li>多种支付方式</li>
+                        <li>实时物流跟踪</li>
+                        <li>专业客服支持</li>
+                        <li>售后服务保障</li>
+                        <li>企业采购解决方案</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🌐 平台功能</h3>
+                    <ul>
+                        <li>商家资质审核系统</li>
+                        <li>智能流量分配</li>
+                        <li>风险控制与监管</li>
+                        <li>数据分析与洞察</li>
+                        <li>营销活动策划</li>
+                        <li>技术基础设施</li>
+                        <li>客户服务中心</li>
+                        <li>生态合作伙伴管理</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>💼 增值服务</h3>
+                    <ul>
+                        <li>金融服务（贷款、保险）</li>
+                        <li>物流仓储服务</li>
+                        <li>营销推广服务</li>
+                        <li>数据分析服务</li>
+                        <li>技术开发支持</li>
+                        <li>培训与咨询</li>
+                        <li>法律合规支持</li>
+                        <li>国际贸易服务</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35
+            },
+            pie: {
+                textPosition: 0.75
+            },
+            mindmap: {
+                padding: 10,
+                maxNodeWidth: 200
+            }
+        });
+
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

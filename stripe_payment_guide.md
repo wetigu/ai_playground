@@ -6,10 +6,13 @@
 3. [后端实现 (FastAPI + Python)](#3-后端实现-fastapi--python)
 4. [前端实现 (Vue.js)](#4-前端实现-vuejs)
 5. [Webhook处理](#5-webhook处理)
-6. [测试环境 (Sandbox)](#6-测试环境-sandbox)
-7. [生产环境切换](#7-生产环境切换)
-8. [安全最佳实践](#8-安全最佳实践)
-9. [常见问题与解决方案](#9-常见问题与解决方案)
+6. [微信支付接入指南](#6-微信支付接入指南)
+7. [支付宝接入指南](#7-支付宝接入指南)
+8. [多支付方式统一管理](#8-多支付方式统一管理)
+9. [测试环境 (Sandbox)](#9-测试环境-sandbox)
+10. [生产环境切换](#10-生产环境切换)
+11. [安全最佳实践](#11-安全最佳实践)
+12. [常见问题与解决方案](#12-常见问题与解决方案)
 
 ## 1. Stripe简介与准备工作
 
@@ -49,8 +52,14 @@ Stripe是一个全球领先的在线支付处理平台，提供：
 # 安装Stripe Python SDK
 pip install stripe
 
+# 微信支付SDK
+pip install wechatpay-python
+
+# 支付宝SDK
+pip install alipay-sdk-python
+
 # 其他依赖
-pip install fastapi uvicorn python-dotenv pydantic
+pip install fastapi uvicorn python-dotenv pydantic requests cryptography
 ```
 
 ### 2.2 环境变量配置
@@ -63,10 +72,26 @@ STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 
+# 微信支付配置
+WECHAT_PAY_APP_ID=your_wechat_app_id
+WECHAT_PAY_MCH_ID=your_merchant_id
+WECHAT_PAY_API_KEY=your_api_key
+WECHAT_PAY_CERT_PATH=path/to/apiclient_cert.pem
+WECHAT_PAY_KEY_PATH=path/to/apiclient_key.pem
+WECHAT_PAY_NOTIFY_URL=https://yourdomain.com/api/v1/webhooks/wechat
+
+# 支付宝配置
+ALIPAY_APP_ID=your_alipay_app_id
+ALIPAY_APP_PRIVATE_KEY_PATH=path/to/app_private_key.pem
+ALIPAY_ALIPAY_PUBLIC_KEY_PATH=path/to/alipay_public_key.pem
+ALIPAY_SIGN_TYPE=RSA2
+ALIPAY_DEBUG=False
+ALIPAY_NOTIFY_URL=https://yourdomain.com/api/v1/webhooks/alipay
+ALIPAY_RETURN_URL=https://yourdomain.com/payment/success
+
 # 应用配置
 APP_ENV=development
-FRONTEND_URL=http://localhost:3000
-BACKEND_URL=http://localhost:8000
+DEBUG=false
 
 # 数据库配置
 DATABASE_URL=mysql+pymysql://user:password@localhost:3306/tigu_db
@@ -80,6 +105,12 @@ npm install @stripe/stripe-js
 
 # Vue.js项目依赖
 npm install axios vue-router
+
+# 微信支付前端SDK (可选)
+npm install weixin-js-sdk
+
+# 支付宝前端SDK (可选)
+npm install alipay-jssdk
 ```
 
 ## 3. 后端实现 (FastAPI + Python)
@@ -1476,12 +1507,7 @@ export default {
 1. 进入 **Developers** → **Webhooks**
 2. 点击 **Add endpoint**
 3. 输入端点URL: `https://yourdomain.com/api/v1/webhooks/stripe`
-4. 选择要监听的事件：
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-   - `payment_intent.canceled`
-   - `charge.dispute.created`
-   - `invoice.payment_succeeded` (如果使用订阅)
+4. 选择要监听的事件
 
 ### 5.2 Webhook安全验证
 
@@ -1505,7 +1531,7 @@ def verify_webhook_signature(payload: bytes, sig_header: str, webhook_secret: st
 
 ## 6. 测试环境 (Sandbox)
 
-### 6.1 测试卡片信息
+### 6.1 Stripe测试卡片信息
 
 Stripe提供了多种测试卡片用于不同场景：
 
@@ -1537,77 +1563,87 @@ const TEST_CARDS = {
 };
 ```
 
-### 6.2 测试场景脚本
+### 6.2 微信支付测试环境
 
-```javascript
-// tests/payment.test.js
-import { describe, it, expect, beforeEach } from 'vitest';
-import stripeService from '@/services/stripeService';
-
-describe('Stripe支付测试', () => {
-  beforeEach(async () => {
-    await stripeService.initialize();
-  });
-
-  it('应该成功创建支付意图', async () => {
-    const paymentData = {
-      amount: 100.00,
-      currency: 'cny',
-      order_id: 12345
-    };
-
-    const result = await stripeService.createPaymentIntent(paymentData);
-    
-    expect(result).toHaveProperty('client_secret');
-    expect(result).toHaveProperty('payment_intent_id');
-    expect(result.amount).toBe(100.00);
-  });
-
-  it('应该处理支付失败', async () => {
-    // 使用失败测试卡
-    const paymentData = {
-      amount: 100.00,
-      currency: 'cny',
-      order_id: 12345
-    };
-
-    try {
-      await stripeService.createPaymentIntent(paymentData);
-      // 这里应该模拟使用失败卡片的支付确认
-    } catch (error) {
-      expect(error.message).toContain('declined');
+```python
+# 微信支付沙盒配置
+WECHAT_SANDBOX_CONFIG = {
+    "api_base_url": "https://api.mch.weixin.qq.com/sandboxnew",
+    "test_cases": {
+        "success": {
+            "total_fee": 101,  # 1.01元，测试成功
+            "description": "测试支付成功"
+        },
+        "fail": {
+            "total_fee": 102,  # 1.02元，测试失败
+            "description": "测试支付失败"
+        },
+        "timeout": {
+            "total_fee": 103,  # 1.03元，测试超时
+            "description": "测试支付超时"
+        }
     }
-  });
-
-  it('应该处理3D Secure验证', async () => {
-    // 测试3D Secure流程
-    const paymentData = {
-      amount: 100.00,
-      currency: 'cny',
-      order_id: 12345
-    };
-
-    const result = await stripeService.createPaymentIntent(paymentData);
-    
-    // 模拟3D Secure验证
-    expect(result.status).toBe('requires_action');
-  });
-});
+}
 ```
 
-### 6.3 测试环境配置
+### 6.3 支付宝测试环境
 
-```bash
-# .env.test
-STRIPE_PUBLISHABLE_KEY=pk_test_your_test_publishable_key
-STRIPE_SECRET_KEY=sk_test_your_test_secret_key
-STRIPE_WEBHOOK_SECRET=whsec_your_test_webhook_secret
+```python
+# 支付宝沙盒配置
+ALIPAY_SANDBOX_CONFIG = {
+    "gateway": "https://openapi.alipaydev.com/gateway.do",
+    "app_id": "your_sandbox_app_id",
+    "test_accounts": {
+        "buyer": {
+            "account": "sandbox_buyer@example.com",
+            "password": "111111",
+            "pay_password": "111111"
+        },
+        "seller": {
+            "account": "sandbox_seller@example.com", 
+            "password": "111111"
+        }
+    }
+}
+```
 
-# 测试数据库
-DATABASE_URL=mysql+pymysql://test_user:test_pass@localhost:3306/test_tigu_db
+### 6.4 统一测试脚本
 
-# 测试模式标识
-TESTING=true
+```python
+# tests/test_unified_payment.py
+import pytest
+from decimal import Decimal
+from app.services.unified_payment_service import unified_payment_service
+
+class TestUnifiedPayment:
+    
+    @pytest.mark.asyncio
+    async def test_stripe_payment(self, db_session, test_user):
+        """测试Stripe支付"""
+        result = unified_payment_service.create_payment(
+            db=db_session,
+            payment_method="stripe",
+            amount=Decimal("100.00"),
+            order_id=12345
+        )
+        
+        assert "client_secret" in result
+        assert result["amount"] == Decimal("100.00")
+    
+    @pytest.mark.asyncio
+    async def test_wechat_native_payment(self, db_session, test_user):
+        """测试微信扫码支付"""
+        result = unified_payment_service.create_payment(
+            db=db_session,
+            payment_method="wechat_native",
+            amount=Decimal("1.01"),  # 测试成功金额
+            order_id=12345
+        )
+        
+        assert "code_url" in result
+        assert result["trade_type"] == "NATIVE"
+
+        # ... 其他测试用例
 ```
 
 ## 7. 生产环境切换
@@ -1797,362 +1833,6 @@ def log_payment_event(func):
 @log_payment_event
 async def create_payment_intent_with_logging(db, amount, currency, order_id, user_id):
     return await payment_service.create_payment_intent(db, amount, currency, order_id, user_id)
-```
-
-## 8. 安全最佳实践
-
-### 8.1 API密钥安全
-
-```python
-# app/core/security_utils.py
-import os
-import secrets
-from cryptography.fernet import Fernet
-
-class SecureConfig:
-    def __init__(self):
-        self.encryption_key = os.getenv('ENCRYPTION_KEY')
-        if not self.encryption_key:
-            raise ValueError("ENCRYPTION_KEY环境变量未设置")
-        
-        self.cipher = Fernet(self.encryption_key.encode())
-    
-    def encrypt_sensitive_data(self, data: str) -> str:
-        """加密敏感数据"""
-        return self.cipher.encrypt(data.encode()).decode()
-    
-    def decrypt_sensitive_data(self, encrypted_data: str) -> str:
-        """解密敏感数据"""
-        return self.cipher.decrypt(encrypted_data.encode()).decode()
-    
-    @staticmethod
-    def generate_encryption_key() -> str:
-        """生成加密密钥"""
-        return Fernet.generate_key().decode()
-
-# 使用示例
-secure_config = SecureConfig()
-
-# 加密存储Stripe密钥
-encrypted_secret_key = secure_config.encrypt_sensitive_data(stripe_secret_key)
-```
-
-### 8.2 输入验证和清理
-
-```python
-# app/schemas/payment_security.py
-from pydantic import BaseModel, validator, Field
-from decimal import Decimal
-from typing import Optional
-import re
-
-class SecurePaymentCreate(BaseModel):
-    amount: Decimal = Field(..., gt=0, le=999999.99, description="支付金额")
-    currency: str = Field(..., regex="^[A-Z]{3}$", description="货币代码")
-    order_id: int = Field(..., gt=0, description="订单ID")
-    
-    @validator('amount')
-    def validate_amount(cls, v):
-        # 检查金额精度
-        if v.as_tuple().exponent < -2:
-            raise ValueError('金额精度不能超过2位小数')
-        return v
-    
-    @validator('currency')
-    def validate_currency(cls, v):
-        allowed_currencies = ['CNY', 'USD', 'EUR', 'GBP']
-        if v.upper() not in allowed_currencies:
-            raise ValueError(f'不支持的货币: {v}')
-        return v.upper()
-
-class SecureBillingDetails(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    email: str = Field(..., regex=r'^[^@]+@[^@]+\.[^@]+$')
-    phone: Optional[str] = Field(None, regex=r'^\+?[\d\s\-\(\)]+$')
-    
-    @validator('name')
-    def validate_name(cls, v):
-        # 移除特殊字符
-        cleaned = re.sub(r'[^\w\s\-\.]', '', v)
-        if len(cleaned) < 1:
-            raise ValueError('姓名不能为空')
-        return cleaned
-```
-
-### 8.3 防欺诈措施
-
-```python
-# app/services/fraud_detection.py
-import hashlib
-from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
-from app.models.payment import Payment
-
-class FraudDetectionService:
-    def __init__(self):
-        self.max_attempts_per_hour = 5
-        self.max_amount_per_day = 50000.00
-    
-    def check_payment_risk(
-        self, 
-        db: Session, 
-        user_id: int, 
-        amount: float,
-        ip_address: str
-    ) -> dict:
-        """检查支付风险"""
-        risk_score = 0
-        risk_factors = []
-        
-        # 检查频率限制
-        hour_ago = datetime.utcnow() - timedelta(hours=1)
-        recent_attempts = db.query(Payment).filter(
-            Payment.user_id == user_id,
-            Payment.created_at >= hour_ago
-        ).count()
-        
-        if recent_attempts >= self.max_attempts_per_hour:
-            risk_score += 50
-            risk_factors.append("频繁支付尝试")
-        
-        # 检查日限额
-        day_ago = datetime.utcnow() - timedelta(days=1)
-        daily_total = db.query(Payment).filter(
-            Payment.user_id == user_id,
-            Payment.created_at >= day_ago,
-            Payment.status == 'succeeded'
-        ).with_entities(func.sum(Payment.amount)).scalar() or 0
-        
-        if daily_total + amount > self.max_amount_per_day:
-            risk_score += 30
-            risk_factors.append("超过日限额")
-        
-        # 检查异常金额
-        if amount > 10000:
-            risk_score += 20
-            risk_factors.append("大额支付")
-        
-        # 检查IP地址
-        if self.is_suspicious_ip(ip_address):
-            risk_score += 40
-            risk_factors.append("可疑IP地址")
-        
-        return {
-            "risk_score": risk_score,
-            "risk_level": self.get_risk_level(risk_score),
-            "risk_factors": risk_factors,
-            "allow_payment": risk_score < 70
-        }
-    
-    def get_risk_level(self, score: int) -> str:
-        if score < 30:
-            return "低风险"
-        elif score < 70:
-            return "中风险"
-        else:
-            return "高风险"
-    
-    def is_suspicious_ip(self, ip_address: str) -> bool:
-        # 这里可以集成第三方IP风险检测服务
-        # 或者维护一个可疑IP黑名单
-        suspicious_ips = [
-            # 添加已知的可疑IP地址
-        ]
-        return ip_address in suspicious_ips
-
-fraud_detection = FraudDetectionService()
-```
-
-## 9. 常见问题与解决方案
-
-### 9.1 支付失败处理
-
-```python
-# app/services/payment_error_handler.py
-import stripe
-from typing import Dict, Any
-
-class PaymentErrorHandler:
-    @staticmethod
-    def handle_stripe_error(error: stripe.error.StripeError) -> Dict[str, Any]:
-        """处理Stripe错误"""
-        error_map = {
-            'card_declined': {
-                'message': '银行卡被拒绝，请联系您的银行或使用其他卡片',
-                'code': 'CARD_DECLINED',
-                'user_action': 'try_different_card'
-            },
-            'insufficient_funds': {
-                'message': '余额不足，请检查账户余额',
-                'code': 'INSUFFICIENT_FUNDS',
-                'user_action': 'check_balance'
-            },
-            'expired_card': {
-                'message': '银行卡已过期，请使用有效的卡片',
-                'code': 'EXPIRED_CARD',
-                'user_action': 'update_card'
-            },
-            'incorrect_cvc': {
-                'message': 'CVC验证码错误，请检查后重试',
-                'code': 'INCORRECT_CVC',
-                'user_action': 'check_cvc'
-            },
-            'processing_error': {
-                'message': '处理过程中发生错误，请稍后重试',
-                'code': 'PROCESSING_ERROR',
-                'user_action': 'retry_later'
-            }
-        }
-        
-        decline_code = getattr(error, 'decline_code', None)
-        error_code = getattr(error, 'code', 'unknown_error')
-        
-        if decline_code and decline_code in error_map:
-            return error_map[decline_code]
-        elif error_code in error_map:
-            return error_map[error_code]
-        else:
-            return {
-                'message': '支付过程中发生未知错误，请联系客服',
-                'code': 'UNKNOWN_ERROR',
-                'user_action': 'contact_support'
-            }
-```
-
-### 9.2 网络问题处理
-
-```javascript
-// src/utils/paymentRetry.js
-class PaymentRetryHandler {
-  constructor(maxRetries = 3, baseDelay = 1000) {
-    this.maxRetries = maxRetries;
-    this.baseDelay = baseDelay;
-  }
-
-  async executeWithRetry(operation, context = {}) {
-    let lastError;
-    
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        
-        // 检查是否应该重试
-        if (!this.shouldRetry(error, attempt)) {
-          throw error;
-        }
-        
-        // 计算延迟时间（指数退避）
-        const delay = this.baseDelay * Math.pow(2, attempt - 1);
-        
-        console.warn(`支付操作失败，${delay}ms后重试 (${attempt}/${this.maxRetries})`, error);
-        
-        await this.sleep(delay);
-      }
-    }
-    
-    throw lastError;
-  }
-
-  shouldRetry(error, attempt) {
-    // 网络错误或临时错误可以重试
-    const retryableErrors = [
-      'network_error',
-      'timeout',
-      'rate_limit',
-      'api_connection_error'
-    ];
-    
-    return attempt < this.maxRetries && 
-           retryableErrors.some(code => error.message.includes(code));
-  }
-
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-}
-
-export default new PaymentRetryHandler();
-```
-
-### 9.3 性能优化
-
-```python
-# app/services/payment_cache.py
-import redis
-import json
-from typing import Optional, Dict, Any
-from app.core.config import settings
-
-class PaymentCache:
-    def __init__(self):
-        self.redis_client = redis.from_url(settings.REDIS_URL)
-        self.default_ttl = 3600  # 1小时
-    
-    def cache_payment_intent(self, payment_intent_id: str, data: Dict[str, Any], ttl: int = None):
-        """缓存支付意图数据"""
-        key = f"payment_intent:{payment_intent_id}"
-        self.redis_client.setex(
-            key, 
-            ttl or self.default_ttl, 
-            json.dumps(data, default=str)
-        )
-    
-    def get_cached_payment_intent(self, payment_intent_id: str) -> Optional[Dict[str, Any]]:
-        """获取缓存的支付意图数据"""
-        key = f"payment_intent:{payment_intent_id}"
-        cached_data = self.redis_client.get(key)
-        
-        if cached_data:
-            return json.loads(cached_data)
-        return None
-    
-    def invalidate_payment_cache(self, payment_intent_id: str):
-        """清除支付缓存"""
-        key = f"payment_intent:{payment_intent_id}"
-        self.redis_client.delete(key)
-
-payment_cache = PaymentCache()
-```
-
-### 9.4 测试和调试工具
-
-```python
-# app/utils/stripe_debug.py
-import stripe
-from app.core.config import settings
-
-class StripeDebugger:
-    def __init__(self):
-        self.is_debug = settings.DEBUG
-    
-    def log_stripe_request(self, method: str, endpoint: str, params: dict):
-        """记录Stripe API请求"""
-        if self.is_debug:
-            print(f"🔍 Stripe API调用: {method} {endpoint}")
-            print(f"📝 参数: {params}")
-    
-    def log_stripe_response(self, response: dict):
-        """记录Stripe API响应"""
-        if self.is_debug:
-            print(f"✅ Stripe响应: {response}")
-    
-    def simulate_webhook_event(self, event_type: str, data: dict):
-        """模拟Webhook事件（仅测试环境）"""
-        if not settings.STRIPE_SECRET_KEY.startswith('sk_test_'):
-            raise ValueError("只能在测试环境模拟Webhook事件")
-        
-        event = {
-            'id': f'evt_test_{event_type}',
-            'type': event_type,
-            'data': {'object': data},
-            'created': 1234567890
-        }
-        
-        return event
-
-stripe_debugger = StripeDebugger()
 ```
 
 这个完整的Stripe支付解决方案指南涵盖了从开发到生产的全流程，包括：

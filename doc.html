@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wetigu.com Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .file-card {
+            transition: transform 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .badge-file {
+            background-color: #6c757d;
+        }
+        .badge-markdown {
+            background-color: #0d6efd;
+        }
+        .description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">📚 Wetigu.com Documentation</h1>
+                <p class="text-center text-muted mb-5">建材B2B平台文档中心</p>
+            </div>
+        </div>
+        
+        <!-- HTML Files Section -->
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-4">🌐 Interactive Diagrams</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('business_platform_overview.html')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🏗️ 平台功能概览</h5>
+                            <span class="badge badge-file">HTML</span>
+                        </div>
+                        <p class="card-text description">建材B2B平台的核心功能模块、特色服务、运营模式和技术基础的全面展示，包含MVP阶段和后期发展规划的详细流程图。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 business_platform_overview.html
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('business_platform_offerings.html')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">📊 平台功能详解</h5>
+                            <span class="badge badge-file">HTML</span>
+                        </div>
+                        <p class="card-text description">深入介绍平台的各项功能特性，包括产品展示、商家管理、订单处理等核心业务流程的交互式展示和控制面板。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 business_platform_offerings.html
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('backend_system_diagram.html')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">⚙️ 后端系统架构</h5>
+                            <span class="badge badge-file">HTML</span>
+                        </div>
+                        <p class="card-text description">展示后端技术架构设计，包括API网关、业务逻辑层、数据访问层、消息队列等核心组件的关系和数据流向。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 backend_system_diagram.html
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('frontend_system_diagram.html')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🎨 前端系统架构</h5>
+                            <span class="badge badge-file">HTML</span>
+                        </div>
+                        <p class="card-text description">前端技术架构图，展示用户界面层、状态管理、组件系统、路由处理等前端核心模块的设计和交互关系。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 frontend_system_diagram.html
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('shop_manager.html')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🏪 商家管理系统</h5>
+                            <span class="badge badge-file">HTML</span>
+                        </div>
+                        <p class="card-text description">参考亚马逊模式的商家管理系统，包含商家入驻流程、产品管理、订单处理、收益分成等完整商业模式的可视化展示。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 shop_manager.html
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Markdown Files Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">📝 Markdown Documents</h2>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('README.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🚀 项目介绍</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">AI辅助编程示例仓库，提供开发人员学习和实验AI编码工具和技术的空间。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 README.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('Frontend-Wiki.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🎨 前端开发文档</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">建材B2B平台前端架构、技术栈、项目结构和开发工作流的全面指南。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 Frontend-Wiki.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('backend-Wiki.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">⚙️ 后端开发文档</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">后端开发规范、数据库设计、API设计、安全规范和测试部署的详细指南。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 backend-Wiki.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('business_readme.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">💼 商业模式文档</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">建材B2B平台的定位、价值主张、目标用户、数据驱动采购决策和盈利模式分析。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 business_readme.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('GitHub-Wiki-Guide.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">📚 GitHub Wiki 指南</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">如何将Wiki内容添加到GitHub的详细指南，包括网页界面和命令行操作方法。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 GitHub-Wiki-Guide.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('mysql_readme.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🗄️ MySQL 配置指南</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">在WSL2上安装MySQL并从Windows访问的完整指南，包括安全配置和远程访问设置。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 mysql_readme.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('mysql_readme_zh.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">🗄️ MySQL 中文指南</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">MySQL数据库配置和管理的中文版指南文档。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 mysql_readme_zh.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           <!-- 
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('backend_folder_structure.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">📁 后端目录结构</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">FastAPI后端项目的目录结构说明，包括Poetry管理、Docker部署和数据库迁移配置。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 backend_folder_structure.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card file-card h-100" onclick="openFile('frontend_folder_structure.md')">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">📁 前端目录结构</h5>
+                            <span class="badge badge-markdown">MD</span>
+                        </div>
+                        <p class="card-text description">Vue.js前端项目的目录结构说明，包括Vite配置、TypeScript设置和组件架构。</p>
+                        <div class="mt-auto">
+                            <small class="text-muted">
+                                📄 frontend_folder_structure.md
+                            </small>
+                        </div>
+                    </div>
+                </div>
+	    </div>-->
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">💡 说明</h4>
+                    <p class="mb-0">点击上方任意文档卡片即可查看详细内容。这些文档展示了Wetigu建材B2B平台的完整架构和功能设计。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openFile(filename) {
+            if (filename.endsWith('.md')) {
+                // For markdown files, open on GitHub
+                window.open(`https://github.com/wetigu/ai_playground/blob/dev/${filename}`, '_blank');
+            } else {
+                // For HTML files, open normally
+                window.open(filename, '_blank');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -221,6 +221,120 @@ CREATE TABLE `product_images` (
     INDEX `idx_sort` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品图片表';
 
+-- 产品视频表
+CREATE TABLE `product_videos` (
+    `id` BIGINT UNSIGNED PRIMARY KEY,
+    `product_id` BIGINT UNSIGNED,
+    `video_url` VARCHAR(500) NOT NULL,
+    `thumbnail_url` VARCHAR(500),
+    `title` JSON COMMENT '视频标题 {"zh-CN": "产品介绍", "en-US": "Product Introduction"}',
+    `description` JSON COMMENT '视频描述',
+    `video_type` ENUM('product_demo', 'installation', 'usage', 'comparison', 'testimonial', 'factory_tour', 'quality_test', 'application') DEFAULT 'product_demo' COMMENT '视频类型',
+    `duration` INT COMMENT '时长(秒)',
+    `file_size` BIGINT COMMENT '文件大小(字节)',
+    `video_format` VARCHAR(10) DEFAULT 'mp4' COMMENT '视频格式',
+    `video_quality` ENUM('360p', '480p', '720p', '1080p', '4k') DEFAULT '720p',
+    `video_codec` VARCHAR(20) DEFAULT 'h264',
+    `audio_codec` VARCHAR(20) DEFAULT 'aac',
+    `is_primary` BOOLEAN DEFAULT FALSE COMMENT '是否主视频',
+    `is_featured` BOOLEAN DEFAULT FALSE COMMENT '是否推荐视频',
+    `sort_order` INT DEFAULT 0,
+    `view_count` BIGINT DEFAULT 0 COMMENT '播放次数',
+    `like_count` BIGINT DEFAULT 0 COMMENT '点赞次数',
+    `cdn_url` VARCHAR(500) COMMENT 'CDN地址',
+    `streaming_urls` JSON COMMENT '不同质量流媒体地址',
+    `upload_status` ENUM('uploading', 'processing', 'ready', 'failed') DEFAULT 'uploading',
+    `upload_progress` INT DEFAULT 0 COMMENT '上传进度(0-100)',
+    `processing_status` JSON COMMENT '处理状态信息',
+    `metadata` JSON COMMENT '额外元数据',
+    `tags` JSON COMMENT '视频标签',
+    `is_active` BOOLEAN DEFAULT TRUE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE,
+    INDEX `idx_product` (`product_id`),
+    INDEX `idx_type` (`video_type`),
+    INDEX `idx_primary` (`is_primary`),
+    INDEX `idx_featured` (`is_featured`),
+    INDEX `idx_sort` (`sort_order`),
+    INDEX `idx_active` (`is_active`),
+    INDEX `idx_upload_status` (`upload_status`),
+    INDEX `idx_views` (`view_count`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='产品视频表';
+
+-- 视频章节表
+CREATE TABLE `video_chapters` (
+    `id` BIGINT UNSIGNED PRIMARY KEY,
+    `video_id` BIGINT UNSIGNED,
+    `chapter_title` JSON COMMENT '章节标题',
+    `start_time` INT NOT NULL COMMENT '开始时间(秒)',
+    `end_time` INT NOT NULL COMMENT '结束时间(秒)',
+    `chapter_type` ENUM('intro', 'features', 'installation', 'usage', 'maintenance', 'safety', 'conclusion') DEFAULT 'features',
+    `thumbnail_url` VARCHAR(500) COMMENT '章节缩略图',
+    `description` JSON COMMENT '章节描述',
+    `sort_order` INT DEFAULT 0,
+    `is_active` BOOLEAN DEFAULT TRUE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`video_id`) REFERENCES `product_videos`(`id`) ON DELETE CASCADE,
+    INDEX `idx_video` (`video_id`),
+    INDEX `idx_type` (`chapter_type`),
+    INDEX `idx_sort` (`sort_order`),
+    INDEX `idx_time` (`start_time`, `end_time`),
+    INDEX `idx_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频章节表';
+
+-- 视频分析统计表
+CREATE TABLE `video_analytics` (
+    `id` BIGINT UNSIGNED PRIMARY KEY,
+    `video_id` BIGINT UNSIGNED,
+    `user_id` BIGINT UNSIGNED,
+    `company_id` BIGINT UNSIGNED,
+    `action_type` ENUM('view', 'play', 'pause', 'complete', 'like', 'share', 'download') NOT NULL,
+    `watch_duration` INT DEFAULT 0 COMMENT '观看时长(秒)',
+    `watch_percentage` DECIMAL(5,2) DEFAULT 0 COMMENT '观看百分比',
+    `device_type` VARCHAR(50) COMMENT '设备类型',
+    `browser` VARCHAR(100) COMMENT '浏览器',
+    `ip_address` VARCHAR(45) COMMENT 'IP地址',
+    `user_agent` TEXT COMMENT '用户代理',
+    `referrer` VARCHAR(500) COMMENT '来源页面',
+    `session_id` VARCHAR(100) COMMENT '会话ID',
+    `video_quality` VARCHAR(10) COMMENT '播放质量',
+    `buffering_time` INT DEFAULT 0 COMMENT '缓冲时间(毫秒)',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`video_id`) REFERENCES `product_videos`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON DELETE SET NULL,
+    INDEX `idx_video` (`video_id`),
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_company` (`company_id`),
+    INDEX `idx_action` (`action_type`),
+    INDEX `idx_created` (`created_at`),
+    INDEX `idx_analytics_compound` (`video_id`, `action_type`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频分析统计表';
+
+-- 视频互动表
+CREATE TABLE `video_interactions` (
+    `id` BIGINT UNSIGNED PRIMARY KEY,
+    `video_id` BIGINT UNSIGNED,
+    `user_id` BIGINT UNSIGNED,
+    `interaction_type` ENUM('like', 'comment', 'bookmark', 'share', 'report') NOT NULL,
+    `content` TEXT COMMENT '互动内容(如评论内容)',
+    `timestamp_in_video` INT COMMENT '视频中的时间点(秒)',
+    `metadata` JSON COMMENT '额外数据',
+    `is_active` BOOLEAN DEFAULT TRUE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`video_id`) REFERENCES `product_videos`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_video` (`video_id`),
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_type` (`interaction_type`),
+    INDEX `idx_active` (`is_active`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频互动表';
+
 -- ========================================
 -- 4. 订单管理
 -- ========================================

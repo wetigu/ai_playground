@@ -24,20 +24,49 @@ CREATE TABLE `users` (
     `id` BIGINT UNSIGNED PRIMARY KEY,
     `user_code` VARCHAR(20) UNIQUE,
     `email` VARCHAR(255) NOT NULL UNIQUE,
-    `hashed_password` VARCHAR(255) NOT NULL,
+    `hashed_password` VARCHAR(255),
     `full_name` VARCHAR(255),
     `phone` VARCHAR(20),
     `avatar_url` VARCHAR(500),
+    `auth_provider` ENUM('email', 'google', 'microsoft', 'wechat') DEFAULT 'email',
+    `provider_id` VARCHAR(255),
     `is_active` BOOLEAN DEFAULT TRUE,
     `is_superuser` BOOLEAN DEFAULT FALSE,
     `is_verified` BOOLEAN DEFAULT FALSE,
+    `email_verified_at` TIMESTAMP NULL,
+    `failed_login_attempts` INT DEFAULT 0,
+    `locked_until` TIMESTAMP NULL,
     `last_login_at` TIMESTAMP NULL,
+    `password_changed_at` TIMESTAMP NULL,
+    `default_company_id` BIGINT UNSIGNED,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX `idx_email` (`email`),
     INDEX `idx_user_code` (`user_code`),
-    INDEX `idx_active` (`is_active`)
+    INDEX `idx_active` (`is_active`),
+    INDEX `idx_provider` (`auth_provider`, `provider_id`),
+    FOREIGN KEY (`default_company_id`) REFERENCES `companies`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+-- 用户会话管理表
+CREATE TABLE `user_sessions` (
+    `id` BIGINT UNSIGNED PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `session_token` VARCHAR(255) UNIQUE NOT NULL,
+    `refresh_token` VARCHAR(255) UNIQUE,
+    `expires_at` TIMESTAMP NOT NULL,
+    `ip_address` VARCHAR(45),
+    `user_agent` TEXT,
+    `is_active` BOOLEAN DEFAULT TRUE,
+    
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_token` (`session_token`),
+    INDEX `idx_expires` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户会话管理表';
 
 -- 企业信息表
 CREATE TABLE `companies` (

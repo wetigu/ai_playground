@@ -10,6 +10,7 @@
 7. [前端集成方案](#7-前端集成方案)
 8. [安全最佳实践](#8-安全最佳实践)
 9. [方案对比分析](#9-方案对比分析)
+10. [数据库表结构对齐说明](#数据库表结构对齐说明)
 
 ## 1. 认证方案推荐
 
@@ -61,7 +62,7 @@ CREATE TABLE users (
     hashed_password VARCHAR(255),                -- 密码哈希（SSO用户可为空）
     
     -- 个人信息
-    full_name VARCHAR(255) NOT NULL,             -- 真实姓名
+    full_name VARCHAR(255),                      -- 真实姓名
     phone VARCHAR(20),                           -- 手机号
     avatar_url VARCHAR(500),                     -- 头像URL
     
@@ -71,6 +72,7 @@ CREATE TABLE users (
     
     -- 账户状态
     is_active BOOLEAN DEFAULT TRUE,              -- 账户是否激活
+    is_superuser BOOLEAN DEFAULT FALSE,          -- 超级管理员标识
     is_verified BOOLEAN DEFAULT FALSE,           -- 邮箱是否验证
     email_verified_at TIMESTAMP NULL,            -- 邮箱验证时间
     
@@ -88,9 +90,10 @@ CREATE TABLE users (
     
     INDEX idx_email (email),
     INDEX idx_user_code (user_code),
+    INDEX idx_active (is_active),                -- 与tigusql.sql保持一致
     INDEX idx_provider (auth_provider, provider_id),
     FOREIGN KEY (default_company_id) REFERENCES companies(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 用户会话管理表
 CREATE TABLE user_sessions (
@@ -1651,4 +1654,58 @@ async def register(request: Request, ...):
 - ✅ 安全中间件
 - ✅ 审计日志
 
-这个混合认证方案将为梯谷B2B平台提供企业级的用户认证体验，同时保持技术架构的灵活性和成本的可控性。 
+这个混合认证方案将为梯谷B2B平台提供企业级的用户认证体验，同时保持技术架构的灵活性和成本的可控性。
+
+## 🔄 **数据库表结构对齐说明**
+
+### 表结构统一更新
+本认证指南的用户表设计已与 `tigusql.sql` 和 `tigu_database_design_wiki.md` 完全对齐，确保三个文件使用相同的表结构。
+
+### 主要对齐变更
+1. **密码字段**：`hashed_password` 改为可空，支持SSO用户
+2. **超级用户**：添加 `is_superuser` 字段，支持系统管理员
+3. **认证字段**：完整的OAuth和安全相关字段
+4. **索引对齐**：统一索引命名和结构
+5. **会话管理**：添加完整的用户会话跟踪表
+
+### 数据库迁移
+如需将现有数据库升级到新结构，请执行：
+```sql
+-- 数据库迁移脚本
+ALTER TABLE users 
+    MODIFY COLUMN hashed_password VARCHAR(255) NULL,
+    ADD COLUMN auth_provider ENUM('email', 'google', 'microsoft', 'wechat') DEFAULT 'email',
+    ADD COLUMN provider_id VARCHAR(255),
+    ADD COLUMN email_verified_at TIMESTAMP NULL,
+    ADD COLUMN failed_login_attempts INT DEFAULT 0,
+    ADD COLUMN locked_until TIMESTAMP NULL,
+    ADD COLUMN password_changed_at TIMESTAMP NULL,
+    ADD COLUMN default_company_id BIGINT UNSIGNED,
+    ADD INDEX idx_provider (auth_provider, provider_id),
+    ADD FOREIGN KEY (default_company_id) REFERENCES companies(id);
+
+-- 创建会话管理表
+CREATE TABLE user_sessions (
+    id BIGINT UNSIGNED PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    session_token VARCHAR(255) UNIQUE NOT NULL,
+    refresh_token VARCHAR(255) UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user (user_id),
+    INDEX idx_token (session_token),
+    INDEX idx_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 文件对齐状态
+- ✅ `tigusql.sql` - 已更新完整认证字段
+- ✅ `auth_guide_wiki.md` - 已添加超级用户字段
+- ✅ `tigu_database_design_wiki.md` - 参考文档保持一致
+
+所有用户表定义现已完全统一，支持现代认证需求和B2B企业功能。 

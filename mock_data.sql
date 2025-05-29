@@ -190,7 +190,7 @@ INSERT INTO `quotations` (`id`, `quotation_number`, `request_id`, `supplier_id`,
 INSERT INTO `quotation_items` (`id`, `quotation_id`, `request_item_id`, `product_id`, `quantity`, `unit_price`, `total_price`, `specifications`, `brand`, `model`, `delivery_days`) VALUES
 (1, 400001, 1, 100001, 100, 4200.00, 420000.00, '6m length, Grade 400, CSA G30.18 compliant', 'ArcelorMittal', 'Grade400-#4', 7),
 (2, 400002, 2, 100004, 200, 480.00, 96000.00, '50kg bags, General Purpose Portland cement', 'Lafarge', 'GP Type 10', 10),
-(3, 400003, 3, 100003, 50, 5900.00, 295000.00, '6m length, A106 Grade B seamless pipe, ASTM standard', 'Tenaris', 'A106GrB-6"SCH40', 5);
+(3, 400003, 3, 100003, 50, 5900.00, 295000.00, '6m length, A106 Grade B seamless pipe, ASTM standard', 'Tenaris', 'A106GrB-6\\"SCH40', 5);
 
 -- ========================================
 -- 15. 插入支付数据

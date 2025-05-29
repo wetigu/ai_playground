@@ -1,0 +1,10 @@
+#!/bin/bash
+cd /mapp/data/docker
+mkdir cloudbeaver
+GATEWAY_IP=$(docker network inspect bridge | grep Gateway | cut -d'"' -f4)
+echo "Gateway IP: $GATEWAY_IP"
+docker run -d \
+  --name cloudbeaver \
+  --add-host=host.docker.internal:$GATEWAY_IP \
+  -p 8978:8978 \
+  dbeaver/cloudbeaver:latest

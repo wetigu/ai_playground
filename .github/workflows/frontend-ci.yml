@@ -154,14 +154,11 @@ jobs:
       with:
         name: cypress-videos
         path: tigu_frontend_vue/cypress/videos/
-
   deploy-manual:
     runs-on: ubuntu-latest
-    # Only run for manual triggers
-    if: github.event_name == 'workflow_dispatch'
     needs: [test, e2e-tests]
-    # Allow this job to run even if test/e2e jobs are skipped
-    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.e2e-tests.result == 'success' || needs.e2e-tests.result == 'skipped')
+    # Only run for manual triggers and allow if test/e2e jobs are skipped or successful
+    if: github.event_name == 'workflow_dispatch' && always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.e2e-tests.result == 'success' || needs.e2e-tests.result == 'skipped')
     
     steps:
     - name: Checkout code

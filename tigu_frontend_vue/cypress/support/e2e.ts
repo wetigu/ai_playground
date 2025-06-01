@@ -1,5 +1,7 @@
+/// <reference types="cypress" />
 import './commands'
 
-Cypress.on('uncaught:exception', (err, runnable) => {
-    return false
-})
+// Handle uncaught exceptions - commented out to avoid TypeScript issues
+// Cypress.on('uncaught:exception', (_err, _runnable) => {
+//     return false
+// })

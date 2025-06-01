@@ -27,5 +27,6 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["cypress/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

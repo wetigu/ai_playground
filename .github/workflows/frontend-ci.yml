@@ -1,19 +1,53 @@
 name: Frontend CI/CD
 
 on:
+  # Automatic triggers
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
     paths:
       - 'tigu_frontend_vue/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
     paths:
       - 'tigu_frontend_vue/**'
+  
+  # Manual trigger with inputs
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+        - development
+      
+      branch:
+        description: 'Branch to deploy from'
+        required: true
+        default: 'dev'
+        type: string
+      
+      skip_tests:
+        description: 'Skip tests (for hotfixes)'
+        required: false
+        default: false
+        type: boolean
+      
+      deploy_only:
+        description: 'Only run deployment (skip build)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Skip tests if manually requested
+    if: ${{ !inputs.skip_tests }}
     
     strategy:
       matrix:
@@ -22,6 +56,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        # Use input branch if manually triggered
+        ref: ${{ github.event.inputs.branch || github.ref }}
     
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -49,6 +86,9 @@ jobs:
     - name: Build application
       run: npm run build
       working-directory: ./tigu_frontend_vue
+      env:
+        # Use environment from input
+        NODE_ENV: ${{ github.event.inputs.environment == 'production' && 'production' || 'development' }}
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -56,14 +96,17 @@ jobs:
         name: dist-files-${{ matrix.node-version }}
         path: tigu_frontend_vue/dist/
         retention-days: 7
-
   e2e-tests:
     runs-on: ubuntu-latest
     needs: test
+    # Skip if tests are skipped or deploy_only is true
+    if: ${{ !inputs.skip_tests && !inputs.deploy_only }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch || github.ref }}
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -112,9 +155,70 @@ jobs:
         name: cypress-videos
         path: tigu_frontend_vue/cypress/videos/
 
+  deploy-manual:
+    runs-on: ubuntu-latest
+    # Only run for manual triggers
+    if: github.event_name == 'workflow_dispatch'
+    needs: [test, e2e-tests]
+    # Allow this job to run even if test/e2e jobs are skipped
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.e2e-tests.result == 'success' || needs.e2e-tests.result == 'skipped')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: tigu_frontend_vue/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Build application
+      if: ${{ !inputs.deploy_only }}
+      run: npm run build
+      working-directory: ./tigu_frontend_vue
+      env:
+        NODE_ENV: ${{ github.event.inputs.environment == 'production' && 'production' || 'development' }}
+    
+    - name: Deploy to Staging
+      if: github.event.inputs.environment == 'staging'
+      run: |
+        echo "🚀 Deploying to STAGING environment"
+        echo "Branch: ${{ github.event.inputs.branch }}"
+        echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
+        # Add staging deployment commands here
+    
+    - name: Deploy to Production
+      if: github.event.inputs.environment == 'production'
+      run: |
+        echo "🚀 Deploying to PRODUCTION environment"
+        echo "Branch: ${{ github.event.inputs.branch }}"
+        # Add production deployment commands here
+    
+    - name: Deploy to Development
+      if: github.event.inputs.environment == 'development'
+      run: |
+        echo "🚀 Deploying to DEVELOPMENT environment"
+        echo "Branch: ${{ github.event.inputs.branch }}"
+        # Add development deployment commands here
+    
+    - name: Notify deployment
+      run: |
+        echo "✅ Manual deployment completed!"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Branch: ${{ github.event.inputs.branch }}"
+        echo "Tests skipped: ${{ github.event.inputs.skip_tests }}"
   deploy-preview:
     runs-on: ubuntu-latest
     needs: [test, e2e-tests]
+    # Only for automatic PR triggers
     if: github.event_name == 'pull_request'
     
     steps:
@@ -155,7 +259,8 @@ jobs:
   deploy-production:
     runs-on: ubuntu-latest
     needs: [test, e2e-tests]
-    if: github.ref == 'refs/heads/main'
+    # Only for automatic main branch pushes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - name: Checkout code

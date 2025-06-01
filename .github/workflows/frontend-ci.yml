@@ -1,0 +1,190 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'tigu_frontend_vue/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'tigu_frontend_vue/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: tigu_frontend_vue/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Run linting
+      run: npm run lint
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Run unit tests
+      run: npm run test:unit
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Run type checking
+      run: npm run type-check
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Build application
+      run: npm run build
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files-${{ matrix.node-version }}
+        path: tigu_frontend_vue/dist/
+        retention-days: 7
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: tigu_frontend_vue/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Install Cypress
+      run: npx cypress install
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Build application
+      run: npm run build
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Start application
+      run: npm run preview &
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Wait for application to start
+      run: npx wait-on http://localhost:4173
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Run Cypress e2e tests
+      run: npx cypress run
+      working-directory: ./tigu_frontend_vue
+      env:
+        CYPRESS_baseUrl: http://localhost:4173
+    
+    - name: Upload Cypress screenshots
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: tigu_frontend_vue/cypress/screenshots/
+    
+    - name: Upload Cypress videos
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: cypress-videos
+        path: tigu_frontend_vue/cypress/videos/
+
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: tigu_frontend_vue/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Build application
+      run: npm run build
+      working-directory: ./tigu_frontend_vue
+      env:
+        NODE_ENV: production
+    
+    - name: Deploy to Netlify (Preview)
+      uses: nwtgck/actions-netlify@v3.0
+      with:
+        publish-dir: './tigu_frontend_vue/dist'
+        production-branch: main
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        deploy-message: "Deploy from GitHub Actions"
+        enable-pull-request-comment: true
+        enable-commit-comment: true
+        overwrites-pull-request-comment: true
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: tigu_frontend_vue/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./tigu_frontend_vue
+    
+    - name: Build application
+      run: npm run build
+      working-directory: ./tigu_frontend_vue
+      env:
+        NODE_ENV: production
+    
+    - name: Deploy to production
+      run: |
+        echo "Deploy to your production server here"
+        echo "Example: rsync, FTP, or cloud deployment"
+      # Replace with your actual deployment commands
+    
+    - name: Notify deployment success
+      run: |
+        echo "✅ Frontend deployed successfully to production!"
+        echo "🚀 Application is now live"

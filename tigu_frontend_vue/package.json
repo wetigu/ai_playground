@@ -1,14 +1,17 @@
 {
   "name": "tigu-platform-frontend",
   "version": "0.1.0",
-  "private": true,
-  "scripts": {
+  "private": true,  "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:unit": "vitest",
-    "test:e2e": "cypress open",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint:check": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore"
   },
   "dependencies": {
     "@vueuse/core": "^10.2.1",
@@ -17,8 +20,7 @@
     "vue": "^3.3.4",
     "vue-i18n": "^12.0.0-alpha.2",
     "vue-router": "^4.2.4"
-  },
-  "devDependencies": {
+  },  "devDependencies": {
     "@types/node": "^20.4.5",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-typescript": "^11.0.3",
@@ -31,6 +33,7 @@
     "vite": "^4.4.7",
     "vite-plugin-pwa": "^0.16.4",
     "vitest": "^0.33.0",
-    "vue-tsc": "^1.8.8"
+    "vue-tsc": "^1.8.8",
+    "wait-on": "^7.0.1"
   }
 }

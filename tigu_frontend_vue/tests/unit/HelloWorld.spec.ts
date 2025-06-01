@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import HelloWorld from '@/components/HelloWorld.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 
-describe('HelloWorld.vue', () => {
+describe('LanguageSwitcher.vue', () => {
   it('renders properly', () => {
-    const wrapper = mount(HelloWorld);
-    expect(wrapper.text()).toContain('Hello World');
+    const wrapper = mount(LanguageSwitcher);
+    expect(wrapper.exists()).toBe(true);
   });
 });

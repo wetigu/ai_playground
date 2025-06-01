@@ -161,12 +161,17 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
-    },
-    build: {
+    },    build: {
       // Output directory for production build
       outDir: 'dist',
       // Generate sourcemaps for production build
       sourcemap: true
+    },
+    test: {
+      // Use happy-dom for testing environment
+      environment: 'happy-dom',
+      // Include test files
+      include: ['tests/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}']
     }
   };
 });

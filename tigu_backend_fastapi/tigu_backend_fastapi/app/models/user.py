@@ -11,7 +11,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=True)  # Nullable for OAuth users
     full_name = Column(String(255), nullable=False)
@@ -40,7 +40,7 @@ class User(Base):
 class UserSession(Base):
     __tablename__ = "user_sessions"
     
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=False)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     session_token = Column(String(255), unique=True, nullable=False)
     device_info = Column(JSON, nullable=True)
@@ -59,7 +59,7 @@ class UserSession(Base):
 class Company(Base):
     __tablename__ = "companies"
     
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=False)
     company_code = Column(String(50), unique=True, nullable=False)  # Must match DB schema
     company_name = Column(JSON, nullable=False)  # {"zh-CN": "公司名", "en-US": "Company Name"}
     company_type = Column(String(50), nullable=False)  # supplier, buyer, both
@@ -84,7 +84,7 @@ class Company(Base):
 class CompanyUser(Base):
     __tablename__ = "user_company_roles"
     
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=False)
     company_id = Column(BigInteger, ForeignKey("companies.id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     role = Column(String(50), nullable=False)  # admin, manager, employee

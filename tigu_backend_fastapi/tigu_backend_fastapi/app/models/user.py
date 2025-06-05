@@ -43,15 +43,15 @@ class UserSession(Base):
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=False)
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     session_token = Column(String(255), unique=True, nullable=False)
-    device_info = Column(JSON, nullable=True)
+    refresh_token = Column(String(255), unique=True, nullable=True)  # Match DB schema
+    expires_at = Column(DateTime, nullable=False)
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(Text, nullable=True)
-    expires_at = Column(DateTime, nullable=False)
     is_active = Column(Boolean, default=True)
     
-    # Timestamps
+    # Timestamps - Match DB schema exactly
     created_at = Column(DateTime, default=func.now())
-    last_accessed_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     user = relationship("User", back_populates="sessions")
@@ -91,9 +91,8 @@ class CompanyUser(Base):
     permissions = Column(JSON, nullable=True)
     is_active = Column(Boolean, default=True)
     
-    # Timestamps
+    # Timestamps - NOTE: user_company_roles table doesn't have updated_at column in DB schema
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
     # Relationships
     company = relationship("Company", back_populates="users")

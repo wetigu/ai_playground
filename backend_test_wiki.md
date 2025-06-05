@@ -615,6 +615,6 @@ SELECT JSON_EXTRACT(name, '$.zh-CN') FROM products LIMIT 5;
 
 ---
 
-**最后更新**: 2024年12月 
+**最后更新**: 2025年6月 
 **版本**: 1.0
 **状态**: ✅ 已验证与当前codebase对齐 

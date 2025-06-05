@@ -1,6 +1,6 @@
 # SQLAlchemy model for User
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, JSON
+from sqlalchemy import Column, Integer, BigInteger, String, Boolean, DateTime, Text, ForeignKey, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -11,7 +11,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=True)  # Nullable for OAuth users
     full_name = Column(String(255), nullable=False)
@@ -26,7 +26,7 @@ class User(Base):
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime, nullable=True)
     password_changed_at = Column(DateTime, nullable=True)
-    default_company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
+    default_company_id = Column(BigInteger, ForeignKey("companies.id"), nullable=True)
     
     # Timestamps
     created_at = Column(DateTime, default=func.now())
@@ -40,8 +40,8 @@ class User(Base):
 class UserSession(Base):
     __tablename__ = "user_sessions"
     
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id = Column(BigInteger, primary_key=True, index=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     session_token = Column(String(255), unique=True, nullable=False)
     device_info = Column(JSON, nullable=True)
     ip_address = Column(String(45), nullable=True)
@@ -59,10 +59,9 @@ class UserSession(Base):
 class Company(Base):
     __tablename__ = "companies"
     
-    id = Column(Integer, primary_key=True, index=True)
-    company_code = Column(String(50), unique=True, nullable=True)  # Will be generated
+    id = Column(BigInteger, primary_key=True, index=True)
+    company_code = Column(String(50), unique=True, nullable=False)  # Must match DB schema
     company_name = Column(JSON, nullable=False)  # {"zh-CN": "公司名", "en-US": "Company Name"}
-    description = Column(JSON, nullable=True)
     company_type = Column(String(50), nullable=False)  # supplier, buyer, both
     business_license = Column(String(100), nullable=True)
     tax_number = Column(String(50), nullable=True)
@@ -75,13 +74,6 @@ class Company(Base):
     is_verified = Column(Boolean, default=False)
     verification_docs = Column(JSON, nullable=True)
     
-    # Legacy fields for backward compatibility (can be deprecated later)
-    contact_email = Column(String(255), nullable=True)
-    contact_phone = Column(String(50), nullable=True)
-    address = Column(JSON, nullable=True)
-    website = Column(String(255), nullable=True)
-    is_active = Column(Boolean, default=True)
-    
     # Timestamps
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -92,9 +84,9 @@ class Company(Base):
 class CompanyUser(Base):
     __tablename__ = "user_company_roles"
     
-    id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id = Column(BigInteger, primary_key=True, index=True)
+    company_id = Column(BigInteger, ForeignKey("companies.id"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     role = Column(String(50), nullable=False)  # admin, manager, employee
     permissions = Column(JSON, nullable=True)
     is_active = Column(Boolean, default=True)

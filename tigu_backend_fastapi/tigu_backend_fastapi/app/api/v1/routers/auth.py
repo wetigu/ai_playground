@@ -14,6 +14,7 @@ from app.core.security import (
     verify_token, generate_password_reset_token, verify_password_reset_token
 )
 from app.core.config import settings
+from app.utils.id_generator import generate_id, generate_company_code
 import secrets
 import uuid
 
@@ -36,24 +37,26 @@ async def register(
         )
     
     # Create company first
-    # Generate unique company code
-    company_code = f"COMP{datetime.utcnow().strftime('%Y%m%d')}{secrets.token_hex(4).upper()}"
+    company_id = generate_id()
+    company_code = generate_company_code()
     
     company = Company(
+        id=company_id,
         company_code=company_code,
         company_name={"zh-CN": user_data.company_name, "en-US": user_data.company_name},
         company_type=user_data.company_type,
         business_license=user_data.business_license,
         tax_number=user_data.tax_number,
-        is_active=True,
         is_verified=False
     )
     db.add(company)
     db.flush()  # Get company ID
     
     # Create user
+    user_id = generate_id()
     hashed_password = get_password_hash(user_data.password)
     user = User(
+        id=user_id,
         email=user_data.email,
         hashed_password=hashed_password,
         full_name=user_data.full_name,
@@ -67,7 +70,9 @@ async def register(
     db.flush()  # Get user ID
     
     # Associate user with company
+    company_user_id = generate_id()
     company_user = CompanyUser(
+        id=company_user_id,
         company_id=company.id,
         user_id=user.id,
         role="admin",  # First user is admin
@@ -81,7 +86,9 @@ async def register(
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
     # Create session
+    session_id = generate_id()
     session = UserSession(
+        id=session_id,
         user_id=user.id,
         session_token=secrets.token_urlsafe(32),
         expires_at=datetime.utcnow() + timedelta(days=30),

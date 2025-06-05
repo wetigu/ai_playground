@@ -3,13 +3,12 @@
 ## 目录
 1. [测试概述](#测试概述)
 2. [单元测试 (Unit Testing)](#单元测试-unit-testing)
-3. [集成测试 (Integration Testing)](#集成测试-integration-testing)
-4. [API 测试](#api-测试)
-5. [数据库测试](#数据库测试)
-6. [认证测试](#认证测试)
-7. [GitHub Actions 工作流](#github-actions-工作流)
-8. [测试最佳实践](#测试最佳实践)
-9. [故障排除](#故障排除)
+3. [API 测试](#api-测试)
+4. [数据库测试](#数据库测试)
+5. [认证测试](#认证测试)
+6. [GitHub Actions 工作流](#github-actions-工作流)
+7. [测试最佳实践](#测试最佳实践)
+8. [故障排除](#故障排除)
 
 ---
 
@@ -20,40 +19,54 @@
     /\
    /  \     E2E API Tests (少量) - Postman/Newman
   /____\    
- /      \   Integration Tests (中等) - TestClient
+ /      \   API Tests (中等) - FastAPI TestClient
 /________\  Unit Tests (大量) - Pytest
 ```
 
 ### 技术栈
 - **单元测试**: Pytest + FastAPI TestClient
-- **集成测试**: Pytest + SQLAlchemy + TestDB
 - **API测试**: Pytest + HTTPX + FastAPI TestClient
-- **数据库测试**: Pytest + SQLite (内存) / PostgreSQL (测试)
+- **数据库测试**: Pytest + MySQL (测试) / SQLite (内存)
 - **Mock工具**: pytest-mock + responses
 - **代码覆盖率**: pytest-cov
 - **CI/CD**: GitHub Actions
 
-### 项目结构
+### 实际项目结构
 ```
 tigu_backend_fastapi/
 ├── tigu_backend_fastapi/
 │   └── app/
-│       ├── api/
+│       ├── api/v1/routers/
+│       │   ├── auth.py
+│       │   ├── products.py
+│       │   └── orders.py
 │       ├── models/
+│       │   ├── user.py
+│       │   ├── product.py
+│       │   └── order.py
 │       ├── schemas/
 │       ├── crud/
 │       ├── services/
 │       ├── core/
+│       ├── utils/
+│       │   └── id_generator.py
 │       └── main.py
 ├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── api/
+│   ├── test_example.py
+│   ├── test_products.py
 │   └── conftest.py
 ├── requirements.txt
 ├── pyproject.toml
 └── pytest.ini
 ```
+
+### ID 生成策略
+项目使用雪花算法生成 BigInt ID：
+- **用户 ID**: BigInt (非字符串)
+- **公司 ID**: BigInt (非字符串)  
+- **产品 ID**: Integer (自增)
+- **订单 ID**: Integer (自增)
+- **ID 生成**: `utils.id_generator.generate_id()` 使用时间戳+随机数
 
 ---
 
@@ -126,16 +139,27 @@ from app.core.config import settings
 from app.models.user import User, Company, CompanyUser
 from app.core.security import get_password_hash
 
-# 测试数据库配置
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-# 或者使用内存数据库
-# SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+# 测试数据库配置 - 使用 MySQL 测试数据库或 SQLite 内存数据库
+import os
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+# 优先使用环境变量中的测试数据库URL
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL", 
+    "sqlite:///:memory:"  # 内存数据库用于快速测试
 )
+
+# 如果使用 MySQL 测试数据库
+# TEST_DATABASE_URL = "mysql+pymysql://test_user:test_password@localhost:3306/tigu_test_db"
+
+if "sqlite" in TEST_DATABASE_URL:
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+else:
+    engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
+
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @pytest.fixture(scope="session")
@@ -173,13 +197,17 @@ def client(db_session):
 @pytest.fixture
 def test_user(db_session):
     """创建测试用户"""
+    from app.utils.id_generator import generate_id
+    
+    user_id = generate_id()  # 生成 BigInt ID
     user = User(
-        id="test_user_id",
+        id=user_id,
         email="test@example.com",
         hashed_password=get_password_hash("testpassword"),
         full_name="Test User",
         phone="1234567890",
-        is_active=True
+        is_active=True,
+        auth_provider="email"
     )
     db_session.add(user)
     db_session.commit()
@@ -189,11 +217,14 @@ def test_user(db_session):
 @pytest.fixture
 def test_company(db_session):
     """创建测试公司"""
+    from app.utils.id_generator import generate_id, generate_company_code
+    
+    company_id = generate_id()  # 生成 BigInt ID
     company = Company(
-        id="test_company_id",
-        company_code="TEST001",
+        id=company_id,
+        company_code=generate_company_code(),
         company_name={"zh-CN": "测试公司", "en-US": "Test Company"},
-        company_type="manufacturer",
+        company_type="buyer",  # 使用实际的类型值
         business_license="123456789",
         tax_number="987654321",
         is_verified=True
@@ -233,17 +264,22 @@ class TestUserModel:
     
     def test_create_user(self, db_session):
         """测试创建用户"""
+        from app.utils.id_generator import generate_id
+        
+        user_id = generate_id()
         user = User(
-            id="user123",
+            id=user_id,
             email="test@example.com",
             hashed_password=get_password_hash("password123"),
             full_name="Test User",
-            phone="1234567890"
+            phone="1234567890",
+            auth_provider="email"
         )
         db_session.add(user)
         db_session.commit()
         
-        assert user.id == "user123"
+        assert user.id == user_id
+        assert isinstance(user.id, int)  # BigInt 是整数类型
         assert user.email == "test@example.com"
         assert user.full_name == "Test User"
         assert user.is_active is True
@@ -259,38 +295,48 @@ class TestUserModel:
 
     def test_user_relationships(self, db_session, test_company):
         """测试用户关系"""
+        from app.utils.id_generator import generate_id
+        
+        user_id = generate_id()
         user = User(
-            id="user123",
+            id=user_id,
             email="test@example.com",
             hashed_password=get_password_hash("password123"),
             full_name="Test User",
+            auth_provider="email",
             default_company_id=test_company.id
         )
         db_session.add(user)
         db_session.commit()
         
         assert user.default_company_id == test_company.id
+        assert isinstance(user.default_company_id, int)  # BigInt 类型
 
 class TestCompanyModel:
     """公司模型测试"""
     
     def test_create_company(self, db_session):
         """测试创建公司"""
+        from app.utils.id_generator import generate_id, generate_company_code
+        
+        company_id = generate_id()
+        company_code = generate_company_code()
         company = Company(
-            id="company123",
-            company_code="COMP001",
+            id=company_id,
+            company_code=company_code,
             company_name={"zh-CN": "测试公司", "en-US": "Test Company"},
-            company_type="manufacturer",
+            company_type="supplier",  # 使用实际的枚举值
             business_license="BL123456789",
             tax_number="TN987654321"
         )
         db_session.add(company)
         db_session.commit()
         
-        assert company.id == "company123"
-        assert company.company_code == "COMP001"
+        assert company.id == company_id
+        assert isinstance(company.id, int)  # BigInt 类型
+        assert company.company_code == company_code
         assert company.company_name["zh-CN"] == "测试公司"
-        assert company.company_type == "manufacturer"
+        assert company.company_type == "supplier"
         assert company.is_verified is False
 ```
 
@@ -508,144 +554,7 @@ class TestProductsAPI:
         assert data["price"] == 299.99
 ```
 
----
 
-## 集成测试 (Integration Testing)
-
-### 1. 数据库集成测试 (`tests/integration/test_database.py`)
-
-```python
-import pytest
-from sqlalchemy.orm import Session
-from app.models.user import User, Company, CompanyUser
-from app.models.product import Product
-from app.models.order import Order, OrderItem
-
-class TestDatabaseIntegration:
-    """数据库集成测试"""
-    
-    def test_user_company_relationship(self, db_session):
-        """测试用户-公司关系"""
-        # 创建公司
-        company = Company(
-            id="comp123",
-            company_code="TEST001",
-            company_name={"zh-CN": "测试公司", "en-US": "Test Company"},
-            company_type="manufacturer"
-        )
-        db_session.add(company)
-        db_session.flush()
-        
-        # 创建用户
-        user = User(
-            id="user123",
-            email="test@example.com",
-            hashed_password="hashed_password",
-            full_name="Test User",
-            default_company_id=company.id
-        )
-        db_session.add(user)
-        db_session.flush()
-        
-        # 创建用户-公司关联
-        company_user = CompanyUser(
-            id="cu123",
-            company_id=company.id,
-            user_id=user.id,
-            role="admin"
-        )
-        db_session.add(company_user)
-        db_session.commit()
-        
-        # 验证关系
-        assert user.default_company_id == company.id
-        assert len(company.company_users) == 1
-        assert company.company_users[0].user_id == user.id
-
-    def test_product_order_relationship(self, db_session, test_user, test_company):
-        """测试产品-订单关系"""
-        # 创建产品
-        product = Product(
-            id="prod123",
-            name={"zh-CN": "水泥", "en-US": "Cement"},
-            category="cement",
-            price=299.99,
-            company_id=test_company.id
-        )
-        db_session.add(product)
-        db_session.flush()
-        
-        # 创建订单
-        order = Order(
-            id="order123",
-            order_number="ORD202401001",
-            buyer_id=test_user.id,
-            seller_id=test_company.id,
-            status="pending"
-        )
-        db_session.add(order)
-        db_session.flush()
-        
-        # 创建订单项
-        order_item = OrderItem(
-            id="item123",
-            order_id=order.id,
-            product_id=product.id,
-            quantity=50,
-            unit_price=product.price
-        )
-        db_session.add(order_item)
-        db_session.commit()
-        
-        # 验证关系
-        assert len(order.items) == 1
-        assert order.items[0].product_id == product.id
-        assert order.items[0].total_price == 50 * 299.99
-```
-
-### 2. 服务层集成测试 (`tests/integration/test_services.py`)
-
-```python
-import pytest
-from app.services.notification import NotificationService
-from app.services.payment_gateway import PaymentGatewayService
-
-class TestServiceIntegration:
-    """服务层集成测试"""
-    
-    @pytest.mark.asyncio
-    async def test_notification_service(self, db_session, test_user):
-        """测试通知服务"""
-        notification_service = NotificationService()
-        
-        # 发送邮件通知
-        result = await notification_service.send_email(
-            to_email=test_user.email,
-            subject="测试邮件",
-            body="这是一封测试邮件"
-        )
-        
-        assert result["success"] is True
-        assert result["message_id"] is not None
-
-    @pytest.mark.asyncio
-    async def test_payment_gateway_service(self, db_session, test_order):
-        """测试支付网关服务"""
-        payment_service = PaymentGatewayService()
-        
-        # 创建支付
-        payment_data = {
-            "order_id": test_order.id,
-            "amount": test_order.total_amount,
-            "currency": "CNY",
-            "payment_method": "alipay"
-        }
-        
-        result = await payment_service.create_payment(payment_data)
-        
-        assert result["status"] == "pending"
-        assert result["payment_url"] is not None
-```
 
 ---
 
@@ -658,10 +567,12 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 from factory import Sequence, SubFactory, LazyAttribute
 from faker import Faker
+from decimal import Decimal
 from app.models.user import User, Company, CompanyUser
-from app.models.product import Product
+from app.models.product import Product, Category
 from app.models.order import Order, OrderItem
 from app.core.security import get_password_hash
+from app.utils.id_generator import generate_id, generate_company_code
 
 fake = Faker('zh_CN')
 
@@ -671,16 +582,17 @@ class CompanyFactory(SQLAlchemyModelFactory):
         model = Company
         sqlalchemy_session_persistence = "commit"
     
-    id = Sequence(lambda n: f"company_{n}")
-    company_code = Sequence(lambda n: f"COMP{n:03d}")
+    id = LazyAttribute(lambda obj: generate_id())  # 使用雪花算法生成 BigInt ID
+    company_code = LazyAttribute(lambda obj: generate_company_code())
     company_name = LazyAttribute(lambda obj: {
         "zh-CN": fake.company(),
         "en-US": fake.company()
     })
-    company_type = factory.Iterator(["manufacturer", "distributor", "contractor"])
+    company_type = factory.Iterator(["supplier", "buyer", "both"])  # 实际的枚举值
     business_license = Sequence(lambda n: f"BL{n:09d}")
     tax_number = Sequence(lambda n: f"TN{n:09d}")
     is_verified = True
+    credit_rating = "A"
 
 class UserFactory(SQLAlchemyModelFactory):
     """用户工厂"""
@@ -688,13 +600,27 @@ class UserFactory(SQLAlchemyModelFactory):
         model = User
         sqlalchemy_session_persistence = "commit"
     
-    id = Sequence(lambda n: f"user_{n}")
+    id = LazyAttribute(lambda obj: generate_id())  # 使用雪花算法生成 BigInt ID
     email = factory.LazyAttribute(lambda obj: fake.email())
     hashed_password = LazyAttribute(lambda obj: get_password_hash("password123"))
     full_name = factory.LazyAttribute(lambda obj: fake.name())
     phone = factory.LazyAttribute(lambda obj: fake.phone_number())
     is_active = True
+    auth_provider = "email"
     default_company = SubFactory(CompanyFactory)
+
+class CategoryFactory(SQLAlchemyModelFactory):
+    """产品分类工厂"""
+    class Meta:
+        model = Category
+        sqlalchemy_session_persistence = "commit"
+    
+    name = LazyAttribute(lambda obj: {
+        "zh-CN": fake.word(),
+        "en-US": fake.word()
+    })
+    slug = factory.LazyAttribute(lambda obj: fake.slug())
+    is_active = True
 
 class ProductFactory(SQLAlchemyModelFactory):
     """产品工厂"""
@@ -702,16 +628,21 @@ class ProductFactory(SQLAlchemyModelFactory):
         model = Product
         sqlalchemy_session_persistence = "commit"
     
-    id = Sequence(lambda n: f"product_{n}")
+    # 产品使用 Integer 自增 ID (不是 BigInt)
+    sku = factory.LazyAttribute(lambda obj: fake.ean8())
     name = LazyAttribute(lambda obj: {
         "zh-CN": fake.word(),
         "en-US": fake.word()
     })
-    category = factory.Iterator(["cement", "steel", "brick", "wood"])
-    price = factory.LazyAttribute(lambda obj: fake.pydecimal(left_digits=3, right_digits=2, positive=True))
-    unit = factory.Iterator(["bag", "ton", "piece", "m3"])
-    stock_quantity = factory.LazyAttribute(lambda obj: fake.random_int(min=0, max=1000))
-    company = SubFactory(CompanyFactory)
+    price = factory.LazyAttribute(lambda obj: Decimal(fake.pydecimal(left_digits=3, right_digits=2, positive=True)))
+    unit = LazyAttribute(lambda obj: {
+        "zh-CN": fake.word(),
+        "en-US": fake.word()
+    })
+    stock = factory.LazyAttribute(lambda obj: fake.random_int(min=0, max=1000))
+    category = SubFactory(CategoryFactory)
+    supplier_id = LazyAttribute(lambda obj: generate_id())  # 指向公司的 BigInt ID
+    is_active = True
 ```
 
 ### 2. 数据库测试用例 (`tests/database/test_crud.py`)

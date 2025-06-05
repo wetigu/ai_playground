@@ -1,850 +1,620 @@
-# Tigu B2B 后端测试指南
+# Tigu B2B 后端API测试指南
 
-## 目录
-1. [测试概述](#测试概述)
-2. [单元测试 (Unit Testing)](#单元测试-unit-testing)
-3. [API 测试](#api-测试)
-4. [数据库测试](#数据库测试)
-5. [认证测试](#认证测试)
-6. [GitHub Actions 工作流](#github-actions-工作流)
-7. [测试最佳实践](#测试最佳实践)
-8. [故障排除](#故障排除)
+## 📋 目录
+1. [项目概述](#项目概述)
+2. [数据库架构](#数据库架构)
+3. [API端点测试](#api端点测试)
+4. [认证测试](#认证测试)
+5. [产品API测试](#产品api测试)
+6. [订单API测试](#订单api测试)
+7. [自动化测试脚本](#自动化测试脚本)
+8. [测试环境配置](#测试环境配置)
 
 ---
 
-## 测试概述
+## 项目概述
 
-### 测试金字塔架构
-```
-    /\
-   /  \     E2E API Tests (少量) - Postman/Newman
-  /____\    
- /      \   API Tests (中等) - FastAPI TestClient
-/________\  Unit Tests (大量) - Pytest
-```
+### 🏗️ 技术栈
+- **后端框架**: FastAPI + Python 3.8+
+- **数据库**: MySQL 8.0 (tigu_b2b)
+- **ORM**: SQLAlchemy + PyMySQL
+- **认证**: JWT Bearer Token
+- **API文档**: Swagger UI (自动生成)
+- **ID生成**: 雪花算法 (BigInt)
 
-### 技术栈
-- **单元测试**: Pytest + FastAPI TestClient
-- **API测试**: Pytest + HTTPX + FastAPI TestClient
-- **数据库测试**: Pytest + MySQL (测试) / SQLite (内存)
-- **Mock工具**: pytest-mock + responses
-- **代码覆盖率**: pytest-cov
-- **CI/CD**: GitHub Actions
-
-### 实际项目结构
+### 📁 实际项目结构
 ```
 tigu_backend_fastapi/
 ├── tigu_backend_fastapi/
 │   └── app/
-│       ├── api/v1/routers/
-│       │   ├── auth.py
-│       │   ├── products.py
-│       │   └── orders.py
-│       ├── models/
-│       │   ├── user.py
-│       │   ├── product.py
-│       │   └── order.py
-│       ├── schemas/
-│       ├── crud/
-│       ├── services/
-│       ├── core/
+│       ├── main.py                    # FastAPI应用入口
+│       ├── api/v1/
+│       │   ├── api.py                 # 路由注册
+│       │   └── routers/
+│       │       ├── auth.py            # 认证端点
+│       │       ├── products.py        # 产品端点
+│       │       └── orders.py          # 订单端点
+│       ├── models/                    # SQLAlchemy模型
+│       │   ├── user.py               # 用户/公司/会话模型
+│       │   ├── product.py            # 产品/分类模型
+│       │   └── order.py              # 订单/报价模型
+│       ├── schemas/                   # Pydantic模型
+│       ├── core/                     # 核心配置
 │       ├── utils/
-│       │   └── id_generator.py
-│       └── main.py
-├── tests/
-│   ├── test_example.py
-│   ├── test_products.py
-│   └── conftest.py
-├── requirements.txt
-├── pyproject.toml
-└── pytest.ini
+│       │   └── id_generator.py       # 雪花算法ID生成
+│       └── db/                       # 数据库配置
+├── tigusql.sql                       # 数据库初始化脚本
+├── mock_data.sql                     # 测试数据
+├── restart_ubuntu.sh                 # Ubuntu启动脚本
+├── dev.sh                           # 开发脚本
+├── test_auth.sh                     # 认证测试脚本
+└── pyproject.toml                   # Poetry配置
 ```
 
-### ID 生成策略
-项目使用雪花算法生成 BigInt ID：
-- **用户 ID**: BigInt (非字符串)
-- **公司 ID**: BigInt (非字符串)  
-- **产品 ID**: Integer (自增)
-- **订单 ID**: Integer (自增)
-- **ID 生成**: `utils.id_generator.generate_id()` 使用时间戳+随机数
+### 🌐 API基础信息
+- **Base URL**: `http://localhost:8000`
+- **API前缀**: `/api/v1`
+- **文档地址**: `http://localhost:8000/docs` (Swagger UI)
+- **认证方式**: Bearer Token (JWT)
 
 ---
 
-## 单元测试 (Unit Testing)
+## 数据库架构
 
-### 1. 环境配置
+### 🗄️ 核心表结构
 
-#### 安装测试依赖
-```bash
-# 进入后端项目目录
-cd tigu_backend_fastapi
+#### 用户管理表
+```sql
+-- 用户表 (BIGINT主键，非自增)
+users: id, email, hashed_password, full_name, phone, auth_provider, is_active, is_superuser
 
-# 核心测试依赖
-pip install pytest pytest-asyncio pytest-cov pytest-mock
-pip install httpx  # FastAPI 测试客户端
-pip install factory-boy  # 测试数据工厂
-pip install faker  # 生成假数据
+-- 用户会话表
+user_sessions: id, user_id, session_token, refresh_token, expires_at, is_active
 
-# 数据库测试
-pip install pytest-postgresql  # PostgreSQL 测试
-pip install sqlalchemy-utils  # 数据库工具
+-- 企业信息表
+companies: id, company_code, company_name(JSON), company_type, business_license, tax_number
 
-# 或者使用 Poetry
-poetry add --group dev pytest pytest-asyncio pytest-cov pytest-mock
-poetry add --group dev httpx factory-boy faker
-poetry add --group dev pytest-postgresql sqlalchemy-utils
+-- 用户企业关联表 (注意：无updated_at字段)
+user_company_roles: id, user_id, company_id, role, is_active, created_at
 ```
 
-#### Pytest 配置文件 (`pytest.ini`)
-```ini
-[tool:pytest]
-minversion = 6.0
-addopts = 
-    -ra
-    --cov=tigu_backend_fastapi
-    --cov-report=term-missing
-    --cov-report=html
-    --cov-report=xml
-    --cov-fail-under=80
-    --strict-markers
-    --strict-config
-    --disable-warnings
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-markers =
-    slow: marks tests as slow (deselect with '-m "not slow"')
-    unit: unit tests
-    integration: integration tests
-    api: API tests
-    auth: authentication tests
-    database: database tests
-asyncio_mode = auto
+#### 产品管理表
+```sql
+-- 产品分类表
+categories: id, category_code, name(JSON), description(JSON), parent_id, is_active
+
+-- 产品表
+products: id, sku, name(JSON), description(JSON), price, stock, category_id, supplier_id
+
+-- 产品图片表
+product_images: id, product_id, image_url, alt_text, is_primary, sort_order
+
+-- 产品视频表 (新增)
+product_videos: id, product_id, video_url, title(JSON), video_type, duration, view_count
 ```
 
-#### 测试配置 (`tests/conftest.py`)
+#### 订单管理表
+```sql
+-- 订单表
+orders: id, order_number, buyer_company_id, supplier_company_id, status, payment_status
+
+-- 订单项表
+order_items: id, order_id, product_id, quantity, unit_price, total_price
+
+-- 报价表
+quotations: id, quotation_number, buyer_company_id, supplier_company_id, status
+
+-- 报价项表
+quotation_items: id, quotation_id, product_id, quantity, unit_price, total_price
+```
+
+### 🔑 ID生成策略
 ```python
-import pytest
-import asyncio
-from typing import Generator, AsyncGenerator
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+# 使用雪花算法生成BigInt ID
+from app.utils.id_generator import generate_id
 
-from app.main import app
-from app.db.base import Base, get_db
-from app.core.config import settings
-from app.models.user import User, Company, CompanyUser
-from app.core.security import get_password_hash
-
-# 测试数据库配置 - 使用 MySQL 测试数据库或 SQLite 内存数据库
-import os
-
-# 优先使用环境变量中的测试数据库URL
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL", 
-    "sqlite:///:memory:"  # 内存数据库用于快速测试
-)
-
-# 如果使用 MySQL 测试数据库
-# TEST_DATABASE_URL = "mysql+pymysql://test_user:test_password@localhost:3306/tigu_test_db"
-
-if "sqlite" in TEST_DATABASE_URL:
-    engine = create_engine(
-        TEST_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-else:
-    engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-@pytest.fixture(scope="session")
-def event_loop():
-    """创建事件循环用于测试"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-@pytest.fixture(scope="function")
-def db_session():
-    """创建测试数据库会话"""
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        Base.metadata.drop_all(bind=engine)
-
-@pytest.fixture(scope="function")
-def client(db_session):
-    """创建测试客户端"""
-    def override_get_db():
-        try:
-            yield db_session
-        finally:
-            pass
-    
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
-    app.dependency_overrides.clear()
-
-@pytest.fixture
-def test_user(db_session):
-    """创建测试用户"""
-    from app.utils.id_generator import generate_id
-    
-    user_id = generate_id()  # 生成 BigInt ID
-    user = User(
-        id=user_id,
-        email="test@example.com",
-        hashed_password=get_password_hash("testpassword"),
-        full_name="Test User",
-        phone="1234567890",
-        is_active=True,
-        auth_provider="email"
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-    return user
-
-@pytest.fixture
-def test_company(db_session):
-    """创建测试公司"""
-    from app.utils.id_generator import generate_id, generate_company_code
-    
-    company_id = generate_id()  # 生成 BigInt ID
-    company = Company(
-        id=company_id,
-        company_code=generate_company_code(),
-        company_name={"zh-CN": "测试公司", "en-US": "Test Company"},
-        company_type="buyer",  # 使用实际的类型值
-        business_license="123456789",
-        tax_number="987654321",
-        is_verified=True
-    )
-    db_session.add(company)
-    db_session.commit()
-    db_session.refresh(company)
-    return company
-
-@pytest.fixture
-def authenticated_user_token(client, test_user):
-    """获取认证用户的访问令牌"""
-    login_data = {
-        "email": "test@example.com",
-        "password": "testpassword"
-    }
-    response = client.post("/api/v1/auth/login", json=login_data)
-    return response.json()["access_token"]
-
-@pytest.fixture
-def auth_headers(authenticated_user_token):
-    """认证请求头"""
-    return {"Authorization": f"Bearer {authenticated_user_token}"}
+user_id = generate_id()        # 返回BigInt类型
+company_id = generate_id()     # 非自增，手动赋值
 ```
 
-### 2. 单元测试示例
+### 🌍 多语言JSON字段
+```json
+// 产品名称示例
+{
+  "zh-CN": "Grade 400 螺纹钢筋 #4",
+  "en-US": "Grade 400 Rebar #4"
+}
 
-#### 用户模型测试 (`tests/unit/test_models.py`)
-```python
-import pytest
-from datetime import datetime
-from app.models.user import User, Company
-from app.core.security import get_password_hash, verify_password
-
-class TestUserModel:
-    """用户模型测试"""
-    
-    def test_create_user(self, db_session):
-        """测试创建用户"""
-        from app.utils.id_generator import generate_id
-        
-        user_id = generate_id()
-        user = User(
-            id=user_id,
-            email="test@example.com",
-            hashed_password=get_password_hash("password123"),
-            full_name="Test User",
-            phone="1234567890",
-            auth_provider="email"
-        )
-        db_session.add(user)
-        db_session.commit()
-        
-        assert user.id == user_id
-        assert isinstance(user.id, int)  # BigInt 是整数类型
-        assert user.email == "test@example.com"
-        assert user.full_name == "Test User"
-        assert user.is_active is True
-        assert user.created_at is not None
-
-    def test_password_hashing(self):
-        """测试密码哈希"""
-        password = "mysecretpassword"
-        hashed = get_password_hash(password)
-        
-        assert verify_password(password, hashed) is True
-        assert verify_password("wrongpassword", hashed) is False
-
-    def test_user_relationships(self, db_session, test_company):
-        """测试用户关系"""
-        from app.utils.id_generator import generate_id
-        
-        user_id = generate_id()
-        user = User(
-            id=user_id,
-            email="test@example.com",
-            hashed_password=get_password_hash("password123"),
-            full_name="Test User",
-            auth_provider="email",
-            default_company_id=test_company.id
-        )
-        db_session.add(user)
-        db_session.commit()
-        
-        assert user.default_company_id == test_company.id
-        assert isinstance(user.default_company_id, int)  # BigInt 类型
-
-class TestCompanyModel:
-    """公司模型测试"""
-    
-    def test_create_company(self, db_session):
-        """测试创建公司"""
-        from app.utils.id_generator import generate_id, generate_company_code
-        
-        company_id = generate_id()
-        company_code = generate_company_code()
-        company = Company(
-            id=company_id,
-            company_code=company_code,
-            company_name={"zh-CN": "测试公司", "en-US": "Test Company"},
-            company_type="supplier",  # 使用实际的枚举值
-            business_license="BL123456789",
-            tax_number="TN987654321"
-        )
-        db_session.add(company)
-        db_session.commit()
-        
-        assert company.id == company_id
-        assert isinstance(company.id, int)  # BigInt 类型
-        assert company.company_code == company_code
-        assert company.company_name["zh-CN"] == "测试公司"
-        assert company.company_type == "supplier"
-        assert company.is_verified is False
+// 公司名称示例  
+{
+  "zh-CN": "加拿大钢铁供应有限公司",
+  "en-US": "Canadian Steel Supply Ltd"
+}
 ```
-
-#### 认证服务测试 (`tests/unit/test_auth.py`)
-```python
-import pytest
-from datetime import datetime, timedelta
-from app.core.security import (
-    create_access_token, create_refresh_token, verify_token,
-    get_password_hash, verify_password
-)
-from app.core.config import settings
-
-class TestAuthentication:
-    """认证功能测试"""
-    
-    def test_create_access_token(self):
-        """测试创建访问令牌"""
-        data = {"sub": "user123"}
-        token = create_access_token(data)
-        
-        assert token is not None
-        assert isinstance(token, str)
-        
-        # 验证令牌
-        payload = verify_token(token)
-        assert payload["sub"] == "user123"
-        assert payload["type"] == "access"
-
-    def test_create_refresh_token(self):
-        """测试创建刷新令牌"""
-        data = {"sub": "user123"}
-        token = create_refresh_token(data)
-        
-        assert token is not None
-        assert isinstance(token, str)
-        
-        # 验证令牌
-        payload = verify_token(token)
-        assert payload["sub"] == "user123"
-        assert payload["type"] == "refresh"
-
-    def test_token_expiration(self):
-        """测试令牌过期"""
-        data = {"sub": "user123"}
-        # 创建已过期的令牌
-        expired_token = create_access_token(
-            data, expires_delta=timedelta(seconds=-1)
-        )
-        
-        with pytest.raises(Exception):  # JWT expired
-            verify_token(expired_token)
-
-    def test_password_operations(self):
-        """测试密码操作"""
-        password = "supersecret123"
-        hashed = get_password_hash(password)
-        
-        assert verify_password(password, hashed) is True
-        assert verify_password("wrongpassword", hashed) is False
-        assert hashed != password  # 确保密码被哈希
 
 ---
 
-## API 测试
+## API端点测试
 
-### 1. 认证 API 测试 (`tests/api/test_auth_api.py`)
+### 🔍 端点概览
 
-```python
-import pytest
-from fastapi import status
+#### 认证端点 (`/api/v1/auth`)
+- `POST /register` - 用户注册
+- `POST /login` - 用户登录  
+- `POST /refresh-token` - 刷新Token
+- `POST /logout` - 登出
+- `GET /profile` - 获取用户信息
 
-class TestAuthAPI:
-    """认证 API 测试"""
-    
-    def test_register_success(self, client, db_session):
-        """测试用户注册成功"""
-        user_data = {
-            "email": "newuser@example.com",
-            "password": "password123",
-            "full_name": "New User",
-            "phone": "1234567890",
-            "company_name": "Test Company",
-            "company_type": "manufacturer",
-            "business_license": "BL123456",
-            "tax_number": "TN123456"
-        }
-        
-        response = client.post("/api/v1/auth/register", json=user_data)
-        
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert "access_token" in data
-        assert "refresh_token" in data
-        assert data["user"]["email"] == user_data["email"]
-        assert data["user"]["full_name"] == user_data["full_name"]
+#### 产品端点 (`/api/v1/products`)
+- `GET /` - 获取产品列表 (分页+过滤)
+- `GET /{product_id}` - 获取单个产品
+- `GET /categories` - 获取分类列表
+- `POST /` - 创建产品 (需认证)
+- `PUT /{product_id}` - 更新产品 (需认证)
 
-    def test_register_duplicate_email(self, client, test_user):
-        """测试重复邮箱注册"""
-        user_data = {
-            "email": test_user.email,  # 使用已存在的邮箱
-            "password": "password123",
-            "full_name": "Another User",
-            "phone": "1234567890",
-            "company_name": "Another Company",
-            "company_type": "distributor",
-            "business_license": "BL654321",
-            "tax_number": "TN654321"
-        }
-        
-        response = client.post("/api/v1/auth/register", json=user_data)
-        
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "already registered" in response.json()["detail"]
-
-    def test_login_success(self, client, test_user):
-        """测试登录成功"""
-        login_data = {
-            "email": test_user.email,
-            "password": "testpassword"
-        }
-        
-        response = client.post("/api/v1/auth/login", json=login_data)
-        
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert "access_token" in data
-        assert "refresh_token" in data
-        assert data["user"]["email"] == test_user.email
-
-    def test_login_invalid_credentials(self, client, test_user):
-        """测试无效凭据登录"""
-        login_data = {
-            "email": test_user.email,
-            "password": "wrongpassword"
-        }
-        
-        response = client.post("/api/v1/auth/login", json=login_data)
-        
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert "Incorrect email or password" in response.json()["detail"]
-
-    def test_refresh_token(self, client, test_user):
-        """测试刷新令牌"""
-        # 先登录获取刷新令牌
-        login_data = {
-            "email": test_user.email,
-            "password": "testpassword"
-        }
-        login_response = client.post("/api/v1/auth/login", json=login_data)
-        refresh_token = login_response.json()["refresh_token"]
-        
-        # 使用刷新令牌获取新的访问令牌
-        refresh_data = {"refresh_token": refresh_token}
-        response = client.post("/api/v1/auth/refresh-token", json=refresh_data)
-        
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert "access_token" in data
-        assert "refresh_token" in data
-
-    def test_get_profile(self, client, auth_headers):
-        """测试获取用户资料"""
-        response = client.get("/api/v1/auth/profile", headers=auth_headers)
-        
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert "id" in data
-        assert "email" in data
-        assert "full_name" in data
-```
-
-### 2. 产品 API 测试 (`tests/api/test_products_api.py`)
-
-```python
-import pytest
-from fastapi import status
-
-class TestProductsAPI:
-    """产品 API 测试"""
-    
-    def test_get_products_list(self, client, auth_headers):
-        """测试获取产品列表"""
-        response = client.get("/api/v1/products/", headers=auth_headers)
-        
-        assert response.status_code == status.HTTP_200_OK
-        data = response.json()
-        assert "items" in data
-        assert "total" in data
-        assert "page" in data
-        assert "size" in data
-
-    def test_create_product(self, client, auth_headers):
-        """测试创建产品"""
-        product_data = {
-            "name": {"zh-CN": "测试产品", "en-US": "Test Product"},
-            "description": {"zh-CN": "产品描述", "en-US": "Product description"},
-            "category": "cement",
-            "price": 299.99,
-            "unit": "bag",
-            "stock_quantity": 100,
-            "min_order_quantity": 10,
-            "specifications": {"weight": "50kg", "grade": "P.O 42.5"}
-        }
-        
-        response = client.post(
-            "/api/v1/products/", 
-            json=product_data, 
-            headers=auth_headers
-        )
-        
-        assert response.status_code == status.HTTP_201_CREATED
-        data = response.json()
-        assert data["name"]["zh-CN"] == "测试产品"
-        assert data["price"] == 299.99
-```
-
-
-
----
-
-## 数据库测试
-
-### 1. 测试数据工厂 (`tests/factories.py`)
-
-```python
-import factory
-from factory.alchemy import SQLAlchemyModelFactory
-from factory import Sequence, SubFactory, LazyAttribute
-from faker import Faker
-from decimal import Decimal
-from app.models.user import User, Company, CompanyUser
-from app.models.product import Product, Category
-from app.models.order import Order, OrderItem
-from app.core.security import get_password_hash
-from app.utils.id_generator import generate_id, generate_company_code
-
-fake = Faker('zh_CN')
-
-class CompanyFactory(SQLAlchemyModelFactory):
-    """公司工厂"""
-    class Meta:
-        model = Company
-        sqlalchemy_session_persistence = "commit"
-    
-    id = LazyAttribute(lambda obj: generate_id())  # 使用雪花算法生成 BigInt ID
-    company_code = LazyAttribute(lambda obj: generate_company_code())
-    company_name = LazyAttribute(lambda obj: {
-        "zh-CN": fake.company(),
-        "en-US": fake.company()
-    })
-    company_type = factory.Iterator(["supplier", "buyer", "both"])  # 实际的枚举值
-    business_license = Sequence(lambda n: f"BL{n:09d}")
-    tax_number = Sequence(lambda n: f"TN{n:09d}")
-    is_verified = True
-    credit_rating = "A"
-
-class UserFactory(SQLAlchemyModelFactory):
-    """用户工厂"""
-    class Meta:
-        model = User
-        sqlalchemy_session_persistence = "commit"
-    
-    id = LazyAttribute(lambda obj: generate_id())  # 使用雪花算法生成 BigInt ID
-    email = factory.LazyAttribute(lambda obj: fake.email())
-    hashed_password = LazyAttribute(lambda obj: get_password_hash("password123"))
-    full_name = factory.LazyAttribute(lambda obj: fake.name())
-    phone = factory.LazyAttribute(lambda obj: fake.phone_number())
-    is_active = True
-    auth_provider = "email"
-    default_company = SubFactory(CompanyFactory)
-
-class CategoryFactory(SQLAlchemyModelFactory):
-    """产品分类工厂"""
-    class Meta:
-        model = Category
-        sqlalchemy_session_persistence = "commit"
-    
-    name = LazyAttribute(lambda obj: {
-        "zh-CN": fake.word(),
-        "en-US": fake.word()
-    })
-    slug = factory.LazyAttribute(lambda obj: fake.slug())
-    is_active = True
-
-class ProductFactory(SQLAlchemyModelFactory):
-    """产品工厂"""
-    class Meta:
-        model = Product
-        sqlalchemy_session_persistence = "commit"
-    
-    # 产品使用 Integer 自增 ID (不是 BigInt)
-    sku = factory.LazyAttribute(lambda obj: fake.ean8())
-    name = LazyAttribute(lambda obj: {
-        "zh-CN": fake.word(),
-        "en-US": fake.word()
-    })
-    price = factory.LazyAttribute(lambda obj: Decimal(fake.pydecimal(left_digits=3, right_digits=2, positive=True)))
-    unit = LazyAttribute(lambda obj: {
-        "zh-CN": fake.word(),
-        "en-US": fake.word()
-    })
-    stock = factory.LazyAttribute(lambda obj: fake.random_int(min=0, max=1000))
-    category = SubFactory(CategoryFactory)
-    supplier_id = LazyAttribute(lambda obj: generate_id())  # 指向公司的 BigInt ID
-    is_active = True
-```
-
-### 2. 数据库测试用例 (`tests/database/test_crud.py`)
-
-```python
-import pytest
-from app.crud.user import create_user, get_user_by_email
-from app.crud.product import create_product, get_products
-from app.schemas.user import UserCreate
-from app.schemas.product import ProductCreate
-
-class TestCRUDOperations:
-    """CRUD 操作测试"""
-    
-    def test_create_user(self, db_session):
-        """测试创建用户"""
-        user_data = UserCreate(
-            email="test@example.com",
-            password="password123",
-            full_name="Test User",
-            phone="1234567890"
-        )
-        
-        created_user = create_user(db_session, user_data)
-        
-        assert created_user.email == user_data.email
-        assert created_user.full_name == user_data.full_name
-        assert created_user.id is not None
-
-    def test_get_user_by_email(self, db_session, test_user):
-        """测试根据邮箱获取用户"""
-        user = get_user_by_email(db_session, test_user.email)
-        
-        assert user is not None
-        assert user.email == test_user.email
-        assert user.id == test_user.id
-
-    def test_create_product(self, db_session, test_company):
-        """测试创建产品"""
-        product_data = ProductCreate(
-            name={"zh-CN": "测试产品", "en-US": "Test Product"},
-            category="cement",
-            price=299.99,
-            unit="bag",
-            company_id=test_company.id
-        )
-        
-        created_product = create_product(db_session, product_data)
-        
-        assert created_product.name["zh-CN"] == "测试产品"
-        assert created_product.price == 299.99
-        assert created_product.company_id == test_company.id
-
-    def test_get_products_with_filters(self, db_session, test_company):
-        """测试筛选产品"""
-        # 创建测试产品
-        products_data = [
-            {"name": {"zh-CN": "水泥A", "en-US": "Cement A"}, "category": "cement", "price": 200.0},
-            {"name": {"zh-CN": "水泥B", "en-US": "Cement B"}, "category": "cement", "price": 300.0},
-            {"name": {"zh-CN": "钢材", "en-US": "Steel"}, "category": "steel", "price": 400.0}
-        ]
-        
-        for product_data in products_data:
-            product_data.update({"unit": "bag", "company_id": test_company.id})
-            create_product(db_session, ProductCreate(**product_data))
-        
-        # 测试分类筛选
-        cement_products = get_products(db_session, category="cement")
-        assert len(cement_products) == 2
-        
-        # 测试价格范围筛选
-        filtered_products = get_products(db_session, min_price=250.0, max_price=350.0)
-        assert len(filtered_products) == 1
-        assert filtered_products[0].name["zh-CN"] == "水泥B"
-```
+#### 订单端点 (`/api/v1/orders`)
+- `GET /` - 获取订单列表 (需认证)
+- `POST /` - 创建订单 (需认证)
+- `GET /{order_id}` - 获取订单详情 (需认证)
+- `POST /quotations/` - 创建报价 (需认证)
 
 ---
 
 ## 认证测试
 
-### 1. JWT 令牌测试 (`tests/auth/test_jwt.py`)
+### 🔐 JWT认证流程
 
-```python
-import pytest
-from datetime import datetime, timedelta
-from jose import jwt, JWTError
-from app.core.security import (
-    create_access_token, create_refresh_token, verify_token,
-    SECRET_KEY, ALGORITHM
-)
-from app.core.config import settings
-
-class TestJWTAuthentication:
-    """JWT 认证测试"""
-    
-    def test_create_and_verify_access_token(self):
-        """测试创建和验证访问令牌"""
-        user_id = "user123"
-        token = create_access_token(data={"sub": user_id})
-        
-        # 解码令牌
-        payload = verify_token(token)
-        
-        assert payload["sub"] == user_id
-        assert payload["type"] == "access"
-        assert "exp" in payload
-
-    def test_create_and_verify_refresh_token(self):
-        """测试创建和验证刷新令牌"""
-        user_id = "user123"
-        token = create_refresh_token(data={"sub": user_id})
-        
-        # 解码令牌
-        payload = verify_token(token)
-        
-        assert payload["sub"] == user_id
-        assert payload["type"] == "refresh"
-        assert "exp" in payload
-
-    def test_expired_token(self):
-        """测试过期令牌"""
-        user_id = "user123"
-        # 创建已过期的令牌
-        expired_time = datetime.utcnow() - timedelta(minutes=1)
-        token = jwt.encode(
-            {"sub": user_id, "exp": expired_time, "type": "access"}, 
-            SECRET_KEY, 
-            algorithm=ALGORITHM
-        )
-        
-        with pytest.raises(JWTError):
-            verify_token(token)
-
-    def test_invalid_token(self):
-        """测试无效令牌"""
-        invalid_token = "invalid.token.here"
-        
-        with pytest.raises(JWTError):
-            verify_token(invalid_token)
-
-    def test_token_without_subject(self):
-        """测试没有主题的令牌"""
-        token = jwt.encode(
-            {"exp": datetime.utcnow() + timedelta(minutes=30), "type": "access"}, 
-            SECRET_KEY, 
-            algorithm=ALGORITHM
-        )
-        
-        with pytest.raises(JWTError):
-            verify_token(token)
+#### 1. 用户注册
+```bash
+curl -X POST "http://localhost:8000/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123456!",
+    "full_name": "Test User",
+    "phone": "1234567890",
+    "company_name": "Test Company",
+    "company_type": "buyer",
+    "business_license": "TEST123",
+    "tax_number": "TAX123"
+  }'
 ```
 
-### 2. 权限测试 (`tests/auth/test_permissions.py`)
-
-```python
-import pytest
-from fastapi import HTTPException
-from app.api.deps import get_current_user, get_current_active_user
-from app.models.user import User
-
-class TestPermissions:
-    """权限测试"""
-    
-    @pytest.mark.asyncio
-    async def test_get_current_user_with_valid_token(self, db_session, test_user):
-        """测试有效令牌获取当前用户"""
-        token = create_access_token(data={"sub": test_user.id})
-        
-        # 模拟依赖注入
-        current_user = await get_current_user(token=token, db=db_session)
-        
-        assert current_user.id == test_user.id
-        assert current_user.email == test_user.email
-
-    @pytest.mark.asyncio
-    async def test_get_current_user_with_invalid_token(self, db_session):
-        """测试无效令牌获取当前用户"""
-        invalid_token = "invalid.token"
-        
-        with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(token=invalid_token, db=db_session)
-        
-        assert exc_info.value.status_code == 401
-
-    @pytest.mark.asyncio
-    async def test_get_current_active_user_inactive(self, db_session):
-        """测试获取非活跃用户"""
-        # 创建非活跃用户
-        inactive_user = User(
-            id="inactive_user",
-            email="inactive@example.com",
-            hashed_password="hashed_password",
-            full_name="Inactive User",
-            is_active=False
-        )
-        db_session.add(inactive_user)
-        db_session.commit()
-        
-        with pytest.raises(HTTPException) as exc_info:
-            await get_current_active_user(current_user=inactive_user)
-        
-        assert exc_info.value.status_code == 400
-        assert "Inactive user" in str(exc_info.value.detail)
+**期望响应**:
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "expires_in": 1800,
+  "user": {
+    "id": 1734567890123456,
+    "email": "test@example.com",
+    "full_name": "Test User",
+    "default_company_id": 1734567890789012
+  }
+}
 ```
-``` 
+
+#### 2. 用户登录
+```bash
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123456!"
+  }'
+```
+
+#### 3. 使用Token访问保护端点
+```bash
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  "http://localhost:8000/api/v1/auth/profile"
+```
+
+### 🧪 认证测试脚本
+```bash
+# 使用内置测试脚本
+./test_auth.sh
+
+# 或使用开发脚本
+./dev.sh auth-test
+```
+
+---
+
+## 产品API测试
+
+### 📦 产品端点测试
+
+#### 1. 获取产品列表 (无需认证)
+```bash
+# 基础查询
+curl "http://localhost:8000/api/v1/products/"
+
+# 分页查询
+curl "http://localhost:8000/api/v1/products/?page=1&per_page=10"
+
+# 搜索产品
+curl "http://localhost:8000/api/v1/products/?search=rebar"
+
+# 价格范围过滤
+curl "http://localhost:8000/api/v1/products/?min_price=3000&max_price=5000"
+
+# 按分类过滤
+curl "http://localhost:8000/api/v1/products/?category_id=1"
+
+# 按供应商过滤
+curl "http://localhost:8000/api/v1/products/?supplier_id=1001"
+
+# 仅显示有库存产品
+curl "http://localhost:8000/api/v1/products/?in_stock=true"
+
+# 组合过滤
+curl "http://localhost:8000/api/v1/products/?search=steel&min_price=1000&category_id=1&page=1&per_page=5"
+```
+
+#### 2. 获取单个产品
+```bash
+# 使用测试数据中的产品ID
+curl "http://localhost:8000/api/v1/products/100001"
+curl "http://localhost:8000/api/v1/products/100002"
+curl "http://localhost:8000/api/v1/products/100003"
+```
+
+#### 3. 获取产品分类
+```bash
+# 获取所有分类
+curl "http://localhost:8000/api/v1/products/categories"
+
+# 获取顶级分类
+curl "http://localhost:8000/api/v1/products/categories?parent_id="
+
+# 获取子分类
+curl "http://localhost:8000/api/v1/products/categories?parent_id=1"
+```
+
+### 📊 测试数据参数
+
+基于 `mock_data.sql` 中的实际数据:
+
+#### 产品ID
+- `100001` - Grade 400 Rebar #4 (螺纹钢筋)
+- `100002` - Steel Pipe 4" Schedule 40 (钢管)  
+- `100003` - General Purpose Portland Cement (通用水泥)
+- `100004` - High Early Strength Portland Cement (早强水泥)
+- `100005` - Structural Steel Plate A36 (结构钢板)
+
+#### 分类ID
+- `1` - Steel Materials (钢材)
+- `2` - Cement & Concrete (水泥混凝土)
+- `3` - Pipes & Fittings (管道配件)  
+- `4` - Reinforcement (钢筋)
+
+#### 供应商ID
+- `1001` - Canadian Steel Supply Ltd (加拿大钢铁供应)
+- `1002` - Northern Cement Corp (北方水泥公司)
+- `1003` - Pacific Building Materials (太平洋建材)
+
+#### 价格范围
+- 最低价: $850.00 (水泥)
+- 最高价: $12,500.00 (钢板)
+- 常用范围: $1000 - $5000
+
+---
+
+## 订单API测试
+
+### 📋 订单管理测试 (需认证)
+
+#### 1. 获取订单列表
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://localhost:8000/api/v1/orders/"
+
+# 按状态过滤
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://localhost:8000/api/v1/orders/?status=pending"
+
+# 按支付状态过滤  
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://localhost:8000/api/v1/orders/?payment_status=paid"
+```
+
+#### 2. 创建订单
+```bash
+curl -X POST "http://localhost:8000/api/v1/orders/" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "buyer_company_id": 1002,
+    "supplier_company_id": 1001,
+    "delivery_address": {
+      "street": "123 Construction St",
+      "city": "Toronto",
+      "province": "ON",
+      "postal_code": "M5V 1A1",
+      "country": "Canada"
+    },
+    "delivery_contact": {
+      "name": "John Smith",
+      "phone": "+1-416-555-0123",
+      "email": "john@construction.ca"
+    },
+    "requested_delivery_date": "2024-02-15T00:00:00Z",
+    "notes": "Urgent delivery required",
+    "items": [
+      {
+        "product_id": 100001,
+        "quantity": 10,
+        "unit_price": 4200.00
+      },
+      {
+        "product_id": 100002,  
+        "quantity": 5,
+        "unit_price": 2850.00
+      }
+    ]
+  }'
+```
+
+#### 3. 获取订单详情
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://localhost:8000/api/v1/orders/1000000001"
+```
+
+#### 4. 创建报价
+```bash
+curl -X POST "http://localhost:8000/api/v1/orders/quotations/" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "buyer_company_id": 1002,
+    "supplier_company_id": 1001,
+    "quotation_type": "formal",
+    "valid_until": "2024-02-28T23:59:59Z",
+    "terms_conditions": "Standard terms apply",
+    "notes": "Best price offer",
+    "items": [
+      {
+        "product_id": 100001,
+        "quantity": 50,
+        "unit_price": 4100.00,
+        "description": "Grade 400 Rebar bulk discount",
+        "delivery_time": "5-7 business days"
+      }
+    ]
+  }'
+```
+
+---
+
+## 自动化测试脚本
+
+### 🚀 开发脚本使用
+
+#### 启动服务器
+```bash
+# Ubuntu/Linux
+./restart_ubuntu.sh
+./dev.sh start
+
+# Windows (PowerShell)
+poetry run uvicorn tigu_backend_fastapi.app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### 运行测试
+```bash
+# 认证测试
+./dev.sh auth-test
+
+# 服务器健康检查
+./dev.sh test
+
+# 清理缓存
+./dev.sh clean
+
+# 停止服务器
+./dev.sh kill
+```
+
+### 📝 自定义测试脚本
+
+#### 产品API测试脚本
+```bash
+#!/bin/bash
+# test_products.sh
+
+BASE_URL="http://localhost:8000/api/v1/products"
+
+echo "🧪 Testing Products API"
+echo "======================"
+
+# 1. 测试产品列表
+echo "1. Testing product list..."
+curl -s "$BASE_URL/" | jq '.total'
+
+# 2. 测试搜索
+echo "2. Testing search..."
+curl -s "$BASE_URL/?search=rebar" | jq '.items | length'
+
+# 3. 测试单个产品
+echo "3. Testing single product..."
+curl -s "$BASE_URL/100001" | jq '.sku'
+
+# 4. 测试分类
+echo "4. Testing categories..."
+curl -s "$BASE_URL/categories" | jq 'length'
+
+echo "✅ Products API test completed!"
+```
+
+#### 订单API测试脚本
+```bash
+#!/bin/bash  
+# test_orders.sh
+
+# 需要先获取认证Token
+echo "🔐 Please provide access token:"
+read -s ACCESS_TOKEN
+
+BASE_URL="http://localhost:8000/api/v1/orders"
+AUTH_HEADER="Authorization: Bearer $ACCESS_TOKEN"
+
+echo "🧪 Testing Orders API"
+echo "===================="
+
+# 1. 测试订单列表
+echo "1. Testing order list..."
+curl -s -H "$AUTH_HEADER" "$BASE_URL/" | jq '.total'
+
+# 2. 测试创建订单
+echo "2. Testing order creation..."
+ORDER_DATA='{
+  "buyer_company_id": 1002,
+  "supplier_company_id": 1001,
+  "items": [{"product_id": 100001, "quantity": 5, "unit_price": 4200.00}]
+}'
+
+curl -s -X POST -H "$AUTH_HEADER" -H "Content-Type: application/json" \
+  -d "$ORDER_DATA" "$BASE_URL/" | jq '.order_number'
+
+echo "✅ Orders API test completed!"
+```
+
+---
+
+## 测试环境配置
+
+### 🛠️ 环境准备
+
+#### 1. 数据库设置
+```bash
+# 创建测试数据库
+mysql -u root -p
+CREATE DATABASE tigu_b2b_test;
+
+# 导入数据库结构
+mysql -u root -p tigu_b2b_test < tigusql.sql
+
+# 导入测试数据
+mysql -u root -p tigu_b2b_test < mock_data.sql
+```
+
+#### 2. 环境变量配置
+```bash
+# .env 文件
+DATABASE_URL=mysql+pymysql://user:password@localhost:3306/tigu_b2b_test
+SECRET_KEY=your-test-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+DEBUG=True
+```
+
+#### 3. Python依赖安装
+```bash
+# 使用Poetry
+poetry install
+
+# 或使用pip
+pip install -r requirements.txt
+```
+
+### ✅ 测试检查清单
+
+#### 基础功能测试
+- [ ] 服务器启动成功 (`http://localhost:8000`)
+- [ ] API文档可访问 (`http://localhost:8000/docs`)
+- [ ] 数据库连接正常
+- [ ] 雪花算法ID生成正常
+
+#### 认证功能测试
+- [ ] 用户注册成功
+- [ ] 用户登录成功  
+- [ ] Token生效
+- [ ] 受保护端点访问正常
+
+#### 产品API测试
+- [ ] 产品列表获取正常
+- [ ] 搜索功能正常
+- [ ] 分页功能正常
+- [ ] 过滤功能正常
+- [ ] 单个产品详情正常
+
+#### 订单API测试  
+- [ ] 订单列表获取正常
+- [ ] 订单创建成功
+- [ ] 报价创建成功
+- [ ] 订单状态更新正常
+
+### 🐛 常见问题排除
+
+#### 1. 模块导入错误
+```bash
+# 确保在正确目录
+cd tigu_backend_fastapi
+
+# 设置Python路径
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+
+# 使用Poetry运行
+poetry run uvicorn tigu_backend_fastapi.app.main:app --reload
+```
+
+#### 2. 数据库连接错误
+```bash
+# 检查数据库状态
+systemctl status mysql
+
+# 检查连接参数
+mysql -u username -p database_name
+
+# 检查防火墙设置
+sudo ufw status
+```
+
+#### 3. ID生成错误
+```sql
+-- 检查ID是否正确生成
+SELECT id FROM users ORDER BY created_at DESC LIMIT 5;
+
+-- 检查是否使用BIGINT
+DESCRIBE users;
+```
+
+#### 4. JSON字段错误
+```sql
+-- 检查JSON字段格式
+SELECT name FROM products WHERE JSON_VALID(name) = 0;
+
+-- 测试JSON提取
+SELECT JSON_EXTRACT(name, '$.zh-CN') FROM products LIMIT 5;
+```
+
+---
+
+## 📚 参考资源
+
+### API文档
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI JSON**: http://localhost:8000/api/v1/openapi.json
+
+### 相关文件
+- `tigusql.sql` - 数据库结构
+- `mock_data.sql` - 测试数据
+- `tigu_database_design_wiki.md` - 数据库设计文档
+- `auth_guide_wiki.md` - 认证方案文档
+- `api_endpoints_documentation.md` - API端点文档
+
+### 测试工具
+- **curl** - 命令行HTTP客户端
+- **jq** - JSON处理工具
+- **Postman** - GUI API测试工具
+- **HTTPie** - 用户友好的HTTP客户端
+
+---
+
+**最后更新**: 2024年12月 
+**版本**: 1.0
+**状态**: ✅ 已验证与当前codebase对齐 

@@ -12,7 +12,7 @@ class RegisterRequest(BaseModel):
     full_name: str
     phone: Optional[str] = None
     company_name: str
-    company_type: str = Field(..., regex="^(supplier|buyer|both)$")
+    company_type: str = Field(..., pattern="^(supplier|buyer|both)$")
     business_license: Optional[str] = None
     tax_number: Optional[str] = None
 

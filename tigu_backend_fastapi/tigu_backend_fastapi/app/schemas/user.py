@@ -58,7 +58,7 @@ class UserSessionResponse(BaseModel):
 
 # Company schemas
 class CompanyBase(BaseModel):
-    name: Dict[str, str]  # {"zh-CN": "公司名", "en-US": "Company Name"}
+    company_name: Dict[str, str]  # {"zh-CN": "公司名", "en-US": "Company Name"}
     description: Optional[Dict[str, str]] = None
     company_type: str  # supplier, buyer, both
     business_license: Optional[str] = None
@@ -72,7 +72,7 @@ class CompanyCreate(CompanyBase):
     pass
 
 class CompanyUpdate(BaseModel):
-    name: Optional[Dict[str, str]] = None
+    company_name: Optional[Dict[str, str]] = None
     description: Optional[Dict[str, str]] = None
     company_type: Optional[str] = None
     business_license: Optional[str] = None
@@ -87,6 +87,7 @@ class CompanyResponse(CompanyBase):
     model_config = ConfigDict(from_attributes=True)
     
     id: int
+    company_code: Optional[str] = None
     is_active: bool
     is_verified: bool
     created_at: datetime

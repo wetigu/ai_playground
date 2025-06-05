@@ -36,8 +36,12 @@ async def register(
         )
     
     # Create company first
+    # Generate unique company code
+    company_code = f"COMP{datetime.utcnow().strftime('%Y%m%d')}{secrets.token_hex(4).upper()}"
+    
     company = Company(
-        name={"zh-CN": user_data.company_name, "en-US": user_data.company_name},
+        company_code=company_code,
+        company_name={"zh-CN": user_data.company_name, "en-US": user_data.company_name},
         company_type=user_data.company_type,
         business_license=user_data.business_license,
         tax_number=user_data.tax_number,

@@ -60,17 +60,27 @@ class Company(Base):
     __tablename__ = "companies"
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(JSON, nullable=False)  # {"zh-CN": "公司名", "en-US": "Company Name"}
+    company_code = Column(String(50), unique=True, nullable=True)  # Will be generated
+    company_name = Column(JSON, nullable=False)  # {"zh-CN": "公司名", "en-US": "Company Name"}
     description = Column(JSON, nullable=True)
     company_type = Column(String(50), nullable=False)  # supplier, buyer, both
-    business_license = Column(String(255), nullable=True)
-    tax_number = Column(String(255), nullable=True)
+    business_license = Column(String(100), nullable=True)
+    tax_number = Column(String(50), nullable=True)
+    legal_representative = Column(String(100), nullable=True)
+    registered_address = Column(Text, nullable=True)
+    business_scope = Column(JSON, nullable=True)
+    credit_rating = Column(String(10), default="B")
+    credit_limit = Column(Integer, default=0)
+    payment_terms = Column(Integer, default=30)
+    is_verified = Column(Boolean, default=False)
+    verification_docs = Column(JSON, nullable=True)
+    
+    # Legacy fields for backward compatibility (can be deprecated later)
     contact_email = Column(String(255), nullable=True)
     contact_phone = Column(String(50), nullable=True)
     address = Column(JSON, nullable=True)
     website = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
     
     # Timestamps
     created_at = Column(DateTime, default=func.now())
@@ -80,7 +90,7 @@ class Company(Base):
     users = relationship("CompanyUser", back_populates="company")
 
 class CompanyUser(Base):
-    __tablename__ = "company_users"
+    __tablename__ = "user_company_roles"
     
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)

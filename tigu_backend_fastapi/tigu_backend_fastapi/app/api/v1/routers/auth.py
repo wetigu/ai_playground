@@ -162,7 +162,9 @@ async def login(
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
     # Create session
+    session_id = generate_id()
     session = UserSession(
+        id=session_id,
         user_id=user.id,
         session_token=secrets.token_urlsafe(32),
         expires_at=datetime.utcnow() + timedelta(days=30),

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick development server script
-# Usage: ./dev.sh [clean|test|kill]
+# Usage: ./dev.sh [clean|test|kill|auth-test]
 
 case "${1:-start}" in
     clean)
@@ -17,19 +17,13 @@ case "${1:-start}" in
         echo "✅ Servers stopped!"
         ;;
     test)
-        echo "🧪 Testing registration endpoint..."
-        curl -X POST http://localhost:8000/api/v1/auth/register \
-            -H "Content-Type: application/json" \
-            -d '{
-                "email": "test@example.com",
-                "password": "Test123456!",
-                "full_name": "Test User",
-                "phone": "1234567890",
-                "company_name": "Test Company",
-                "company_type": "buyer",
-                "business_license": "TEST123",
-                "tax_number": "TAX123"
-            }' | jq '.' 2>/dev/null || echo "Install jq for pretty JSON: sudo apt install jq"
+        echo "🧪 Testing server health..."
+        curl -s http://localhost:8000/api/v1/health | jq '.' 2>/dev/null || echo "Server not responding or jq not installed"
+        ;;
+    auth-test)
+        echo "🔐 Running authentication tests..."
+        chmod +x test_auth.sh
+        ./test_auth.sh
         ;;
     debug)
         echo "🐛 Starting server in debug mode..."
@@ -51,6 +45,7 @@ case "${1:-start}" in
         export PYTHONPATH="$(pwd):$PYTHONPATH"
         echo "📍 Server: http://localhost:8000"
         echo "📚 Docs: http://localhost:8000/docs"
+        echo "🧪 Test: ./dev.sh auth-test"
         poetry run uvicorn tigu_backend_fastapi.app.main:app --reload --host 0.0.0.0 --port 8000
         ;;
 esac 

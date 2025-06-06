@@ -76,3 +76,113 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 - Thanks to the AI community for their tools and inspiration
 - Special thanks to the maintainers of open source AI tools
+
+# GitHub Actions Local Runner (act) Installation Script
+
+This script automatically installs Docker and `act` on Ubuntu systems to enable local testing of GitHub Actions workflows.
+
+## What it does
+
+- ✅ Installs Docker (if not already installed)
+- ✅ Adds user to docker group for non-sudo access
+- ✅ Downloads and installs the latest version of `act`
+- ✅ Creates optimized configuration for Ubuntu
+- ✅ Tests the installation
+- ✅ Provides usage instructions
+
+## Prerequisites
+
+- Ubuntu Linux (18.04+)
+- Internet connection
+- Sudo privileges
+
+## Quick Start
+
+1. Make the script executable:
+   ```bash
+   chmod +x install_act.sh
+   ```
+
+2. Run the installation script:
+   ```bash
+   ./install_act.sh
+   ```
+
+3. Follow the prompts and restart your session if prompted
+
+4. Test your installation:
+   ```bash
+   cd /path/to/your/github/repo
+   act -l  # List available workflows
+   act     # Run all workflows
+   ```
+
+## Usage Examples
+
+```bash
+# List all available workflows in current repository
+act -l
+
+# Run all workflows
+act
+
+# Run workflows triggered by push event
+act push
+
+# Run workflows triggered by pull request
+act pull_request
+
+# Run a specific job
+act -j test
+
+# Dry run (show what would execute without running)
+act --dryrun
+
+# Verbose output
+act -v
+
+# Run with specific event data
+act push -e event.json
+```
+
+## What gets installed
+
+- **Docker**: Container runtime required by act
+- **act**: GitHub Actions local runner
+- **Configuration**: Optimized settings in `~/.config/act/actrc`
+
+## Troubleshooting
+
+### Docker permission issues
+If you get permission denied errors:
+```bash
+# Apply group changes without logout
+newgrp docker
+
+# Or logout and login again
+```
+
+### Docker not running
+```bash
+sudo systemctl start docker
+```
+
+### Testing installation
+```bash
+docker --version
+act --version
+docker ps  # Should work without sudo
+```
+
+## Manual Installation
+
+If you prefer manual installation, see the detailed instructions in the script comments or visit:
+- [act GitHub repository](https://github.com/nektos/act)
+- [Docker installation guide](https://docs.docker.com/engine/install/ubuntu/)
+
+## Support
+
+For issues with:
+- **act**: Visit [nektos/act](https://github.com/nektos/act/issues)
+- **Docker**: Visit [Docker documentation](https://docs.docker.com/)
+- **This script**: Check the script output for error messages

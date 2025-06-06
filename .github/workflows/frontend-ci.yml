@@ -91,6 +91,8 @@ jobs:
         NODE_ENV: ${{ github.event.inputs.environment == 'production' && 'production' || 'development' }}
     
     - name: Upload build artifacts
+      # Skip this step when running locally with act
+      if: ${{ !env.ACT }}
       uses: actions/upload-artifact@v4
       with:
         name: dist-files-${{ matrix.node-version }}
@@ -143,14 +145,16 @@ jobs:
     
     - name: Upload Cypress screenshots
       uses: actions/upload-artifact@v4
-      if: failure()
+      # Skip when running locally with act, only run on GitHub
+      if: failure() && !env.ACT
       with:
         name: cypress-screenshots
         path: tigu_frontend_vue/cypress/screenshots/
     
     - name: Upload Cypress videos
       uses: actions/upload-artifact@v4
-      if: failure()
+      # Skip when running locally with act, only run on GitHub
+      if: failure() && !env.ACT
       with:
         name: cypress-videos
         path: tigu_frontend_vue/cypress/videos/
@@ -184,27 +188,92 @@ jobs:
       env:
         NODE_ENV: ${{ github.event.inputs.environment == 'production' && 'production' || 'development' }}
     
+        # Setup SSH Keys for deployment
+    - name: Setup SSH Keys
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/staging_key
+        echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/prod_key
+        echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/dev_key
+        chmod 600 ~/.ssh/staging_key ~/.ssh/prod_key ~/.ssh/dev_key
+        
+        # Add server host keys to known_hosts to avoid prompts
+        ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+        ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+        ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
     - name: Deploy to Staging
       if: github.event.inputs.environment == 'staging'
       run: |
         echo "🚀 Deploying to STAGING environment"
         echo "Branch: ${{ github.event.inputs.branch }}"
-        echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
-        # Add staging deployment commands here
-    
+        echo "Target: ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}"
+        
+        # Deploy files using rsync over SSH
+        rsync -avz --delete --progress \
+          -e "ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no" \
+          ./tigu_frontend_vue/dist/ \
+          ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}/
+        
+        # Optional: Reload web server
+        echo "🔄 Reloading web server..."
+        ssh -i ~/.ssh/staging_key -o StrictHostKeyChecking=no \
+          ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} \
+          "sudo systemctl reload nginx || sudo service nginx reload || true"
+        
+        echo "✅ Successfully deployed to STAGING!"
+        echo "🌐 Visit: https://${{ secrets.STAGING_HOST }}"
+
     - name: Deploy to Production
       if: github.event.inputs.environment == 'production'
       run: |
         echo "🚀 Deploying to PRODUCTION environment"
         echo "Branch: ${{ github.event.inputs.branch }}"
-        # Add production deployment commands here
-    
+        echo "Target: ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}"
+        
+        # Create backup before deployment
+        echo "📦 Creating backup..."
+        ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no \
+          ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} \
+          "cp -r ${{ secrets.PRODUCTION_PATH }} ${{ secrets.PRODUCTION_PATH }}_backup_$(date +%Y%m%d_%H%M%S) || true"
+        
+        # Deploy files using rsync over SSH
+        rsync -avz --delete --progress \
+          -e "ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no" \
+          ./tigu_frontend_vue/dist/ \
+          ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}/
+        
+        # Reload web server
+        echo "🔄 Reloading web server..."
+        ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no \
+          ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} \
+          "sudo systemctl reload nginx || sudo service nginx reload"
+        
+        echo "✅ Successfully deployed to PRODUCTION!"
+        echo "🌐 Visit: https://${{ secrets.PRODUCTION_HOST }}"
+
     - name: Deploy to Development
       if: github.event.inputs.environment == 'development'
       run: |
         echo "🚀 Deploying to DEVELOPMENT environment"
         echo "Branch: ${{ github.event.inputs.branch }}"
-        # Add development deployment commands here
+        echo "Target: ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:${{ secrets.DEV_PATH }}"
+        
+        # Deploy files using rsync over SSH
+        rsync -avz --delete --progress \
+          -e "ssh -i ~/.ssh/dev_key -o StrictHostKeyChecking=no" \
+          ./tigu_frontend_vue/dist/ \
+          ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:${{ secrets.DEV_PATH }}/
+        
+        # Optional: Reload web server
+        echo "🔄 Reloading web server..."
+        ssh -i ~/.ssh/dev_key -o StrictHostKeyChecking=no \
+          ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} \
+          "sudo systemctl reload nginx || sudo service nginx reload || true"
+        
+        echo "✅ Successfully deployed to DEVELOPMENT!"
+        echo "🌐 Visit: https://${{ secrets.DEV_HOST }}"
     
     - name: Notify deployment
       run: |

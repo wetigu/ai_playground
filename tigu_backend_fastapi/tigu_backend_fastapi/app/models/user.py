@@ -1,12 +1,10 @@
 # SQLAlchemy model for User
 
 from sqlalchemy import Column, Integer, BigInteger, String, Boolean, DateTime, Text, ForeignKey, JSON
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
-
-Base = declarative_base()
+from ..db.base import Base
 
 class User(Base):
     __tablename__ = "users"

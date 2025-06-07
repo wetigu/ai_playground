@@ -1,11 +1,9 @@
 # SQLAlchemy model for Product
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, JSON, Numeric, DECIMAL
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-Base = declarative_base()
+from ..db.base import Base
 
 class Category(Base):
     __tablename__ = "categories"

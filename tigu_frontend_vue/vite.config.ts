@@ -138,6 +138,9 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
+    optimizeDeps: {
+      include: ['vue', 'vue-i18n']
+    },
     css: {
       devSourcemap: true,
       preprocessorOptions: {
@@ -161,11 +164,25 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
-    },    build: {
+    },
+    build: {
       // Output directory for production build
       outDir: 'dist',
       // Generate sourcemaps for production build
-      sourcemap: true
+      sourcemap: true,
+      // Ensure JSON files are properly handled
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Keep i18n messages in main chunk to avoid loading issues
+            vendor: ['vue', 'vue-router', 'pinia'],
+            i18n: ['vue-i18n']
+          }
+        }
+      },
+      commonjsOptions: {
+        include: [/vue-i18n/, /node_modules/]
+      }
     },
     test: {
       // Use happy-dom for testing environment

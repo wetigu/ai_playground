@@ -8,22 +8,8 @@ Tigu平台采用基于角色的访问控制（RBAC）系统，通过角色分配
 
 ### 核心表结构
 
-#### 1. `users` 表 - 用户基础信息
-```sql
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
-```
 
-#### 2. `roles` 表 - 角色定义
+#### 1. `roles` 表 - 角色定义
 ```sql
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
@@ -33,11 +19,11 @@ CREATE TABLE roles (
 );
 ```
 
-#### 3. `user_roles` 表 - 用户角色关联（多对多关系）
+#### 2. `user_roles` 表 - 用户角色关联（多对多关系）
 ```sql
 CREATE TABLE user_roles (
     id SERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id BIGINT UNSIGNED NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     assigned_by INTEGER REFERENCES users(id),

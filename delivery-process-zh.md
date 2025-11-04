@@ -252,14 +252,14 @@ graph TB
         D --> |到用户| H[流程4: 司机→用户]
     end
 
-    style A fill:#e1f5ff
-    style B fill:#fff9c4
-    style C fill:#fff9c4
-    style D fill:#fff9c4
-    style E fill:#c8e6c9
-    style F fill:#c8e6c9
-    style G fill:#ffccbc
-    style H fill:#ffccbc
+    style A fill:#e1f5ff,color:#1a1a1a
+    style B fill:#fff9c4,color:#1a1a1a
+    style C fill:#fff9c4,color:#1a1a1a
+    style D fill:#fff9c4,color:#1a1a1a
+    style E fill:#c8e6c9,color:#1a1a1a
+    style F fill:#c8e6c9,color:#1a1a1a
+    style G fill:#ffccbc,color:#1a1a1a
+    style H fill:#ffccbc,color:#1a1a1a
 ```
 
 ---

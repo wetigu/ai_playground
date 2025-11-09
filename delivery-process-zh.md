@@ -1,4 +1,8 @@
 # 配送流程文档
+## table 
+**tigu_prepare_goods:  prepared packages for driver to work on
+**tigu_prepare_goods_item: the items in the prepared packages  
+(can be used for display detail items of the package)
 
 ## 概述
 

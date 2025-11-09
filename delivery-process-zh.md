@@ -1,8 +1,30 @@
 # 配送流程文档
 ## table 
-**tigu_prepare_goods:  prepared packages for driver to work on
-**tigu_prepare_goods_item: the items in the prepared packages  
+**tigu_prepare_goods**:  
+
+prepared packages for driver to work on
+
+**tigu_prepare_goods_item**: 
+
+the items in the prepared packages  
 (can be used for display detail items of the package)
+
+** tigu_order_action **:
+
+   订单所有流程操作，凭证需要记录在tigu_order_action表，同时需要同步修改订单表中的状态以及备货表的状态。Tigu_order_action每次操作（备货完成，司机收货，送达仓库等）新增一条数据。
+	tigu_order_action必填字段：
+   id（雪花算法ID）,
+   create_by（创建人，当前操作人）,
+   create_time（创建时间）,
+   order_id（本次操作关联的订单ID）,
+action_type（操作类型(0备货，1司机收货，2仓库收货，3仓库发货，4完成，5用户申请退款，6商家允许退货 7商家不允许退货 8商家同意退款 9商家拒绝退款 10用户退货信息凭证11.司机送达仓库)）,
+logistics_voucher_file（文件ID列表，多个用,分割，tigu_uploaded_files表的id）
+
+** tigu_uploaded_files **
+
+字段：
+id（雪花算法ID），file_name（文件名称），file_url（文件完整路径），file_size（文件大小），biz_id（文件关联的相关ID，如商品图片，biz_type=product_sku，biz_id=商品SKU的id）
+
 
 ## 概述
 

@@ -3,7 +3,9 @@
 **tigu_prepare_goods**:  
 
 prepared packages for driver to work on
-
+Delivery_type: 0 商家自行配送, 1  第三方配送
+shipping_type: 0  货物配送到仓库, 1 货物配送到用户
+type: 0 商家, 1 仓库
 **tigu_prepare_goods_item**: 
 
 the items in the prepared packages  

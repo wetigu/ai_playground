@@ -5,7 +5,7 @@
 prepared packages for driver to work on
 Delivery_type: 0 商家自行配送, 1  第三方配送
 
-shipping_type: 0  货物配送到仓库, 1 货物配送到用户
+shipping_type: 0  货物配送到用户, 1 货物配送到仓库
 
 type: 0 商家, 1 仓库
 
@@ -35,7 +35,8 @@ id（雪花算法ID），file_name（文件名称），file_url（文件完整�
 
 **tigu_order**
 
-表修改数据：shipping_status=2， 3，4。。。 ，warehouse_shipping_time=当前时间
+表修改数据：shipping_status=( 0备货中 1备货完成 2送往仓库中 3已送达仓库 4配送用户中 5已收货 )warehouse_shipping_time=当前时间
+           order_status（*司机端不修改）：（0待付款，1待发货，2待收货，3已完成，4已取消，5已退款）
 
 ## 概述
 

@@ -22,7 +22,10 @@ the items in the prepared packages
    create_by（创建人，当前操作人）,
    create_time（创建时间）,
    order_id（本次操作关联的订单ID）,
-action_type（操作类型(0备货，1司机收货，2司机确认收货 ，司机送达仓库确认3 ， 仓库收货确认4，仓库发货，完成，5用户申请退款，6商家允许退货 7商家不允许退货 8商家同意退款 9商家拒绝退款 10用户退货信息凭证11.司机送达仓库， 司机送达用户12， 订单完成 13）,
+   order_status (（0待付款，1待发货，2待收货，3已完成，4已取消，5售后中）
+   shipping_status (0备货中 1备货完成 2送往仓库中 3已送达仓库 4配送用户中 5已收货 )
+action_type（操作类型
+操作类型(0备货，1司机收货（到商家收货），2仓库收货，3仓库确认收货，4完成（送达用户即为完成），5用户申请退款，6商家允许退货 7商家不允许退货 8商家同意退款 9商家拒绝退款 10用户退货信息凭证 11司机送达仓库，12司机收货（到仓库收货））,
 logistics_voucher_file（文件ID列表，多个用,分割，tigu_uploaded_files表的id）
 
 ** tigu_uploaded_files **
@@ -42,8 +45,8 @@ id（雪花算法ID），file_name（文件名称），file_url（文件完整�
 
 1. 商家自行配送，货物配送到仓库 (delivery_type 0, shipping type 0)
 2. 商家自行配送，货物配送到用户 (delivery type 0, shippgin type 1)
-3. 第三方配送，货物配送到仓库 (delivery type 1, shipping type 0)
-4. 第三方配送，货物配送到用户 (delivery type 1, shipping type 1)
+3. 第三方配送，货物配送到仓库 (delivery type 1, shipping type 1)
+4. 第三方配送，货物配送到用户 (delivery type 1, shipping type 0)
 
 用户成功下单后进入商家订单。商家操作第一步：备货。商家选择一个或者多个订单，提交备货完成，备货完成。选择本次备货为自行配送，或者第三方配送，以及发货到仓库或者发货到用户，并上传凭证，修改订单、备货状态。
 
